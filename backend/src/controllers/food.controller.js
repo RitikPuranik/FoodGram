@@ -1,8 +1,10 @@
 const foodModel = require('../models/food.model');
 const storageService = require('../services/storage.service');
-const likeModel = require("../models/likes.model")
-const saveModel = require("../models/save.model")
+const likeModel = require("../models/likes.model");
+const saveModel = require("../models/save.model");
 const commentModel = require("../models/comment.model");
+const notificationModel = require("../models/notification.model");
+const followModel = require("../models/follow.model");
 const { v4: uuid } = require("uuid");
 const { get } = require('mongoose');
 
@@ -19,12 +21,45 @@ async function deleteCommentRecursive(commentId) {
 async function createFood(req, res) {
     const fileUploadResult = await storageService.uploadFile(req.file.buffer, uuid())
 
+    // Parse and normalize hashtags: strip #, lowercase, remove duplicates
+    let hashtags = [];
+    if (req.body.hashtags) {
+        const raw = Array.isArray(req.body.hashtags)
+            ? req.body.hashtags
+            : String(req.body.hashtags).split(',');
+        hashtags = [...new Set(
+            raw
+                .map(t => t.trim().replace(/^#+/, '').toLowerCase())
+                .filter(t => t.length > 0)
+        )];
+    }
+
     const foodItem = await foodModel.create({
         name: req.body.name,
         description: req.body.description,
         video: fileUploadResult.url,
-        foodPartner: req.foodPartner._id
+        foodPartner: req.foodPartner._id,
+        hashtags
     })
+
+    // Notify all followers that this vendor posted new content
+    try {
+        const followers = await followModel.find({ following: req.foodPartner._id });
+        const notifications = followers.map(f => ({
+            recipient: f.follower,
+            recipientModel: "user",
+            sender: req.foodPartner._id,
+            senderModel: "foodpartner",
+            type: "new_post",
+            food: foodItem._id,
+            message: `${req.foodPartner.name} posted a new food video`
+        }));
+        if (notifications.length > 0) {
+            await notificationModel.insertMany(notifications);
+        }
+    } catch (e) {
+        console.error("Notification error:", e.message);
+    }
 
     res.status(201).json({
         message: "food created successfully",
@@ -39,6 +74,36 @@ async function getFoodItems(req, res) {
         message: "Food items fetched successfully",
         foodItems
     })
+}
+
+/**
+ * GET /api/food/search?q=pizza
+ * Fuzzy/partial hashtag search using MongoDB regex.
+ * e.g. "pizza" will match posts with hashtags like "pizza", "pizzas", "spicypizza".
+ */
+async function searchByHashtag(req, res) {
+    try {
+        const rawQuery = (req.query.q || '').trim().replace(/^#+/, '').toLowerCase();
+
+        if (!rawQuery) {
+            // No query — return all foods
+            const foodItems = await foodModel.find({}).sort({ createdAt: -1 }).limit(50);
+            return res.status(200).json({ message: 'All food items', foodItems });
+        }
+
+        // Partial, case-insensitive regex match against hashtags array
+        const regex = new RegExp(rawQuery, 'i');
+        const foodItems = await foodModel.find({ hashtags: { $elemMatch: { $regex: regex } } })
+            .sort({ likeCount: -1 })
+            .limit(100);
+
+        res.status(200).json({
+            message: `Search results for "${rawQuery}"`,
+            foodItems
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 }
 
 async function likeFood(req, res) {
@@ -73,6 +138,24 @@ async function likeFood(req, res) {
     await foodModel.findByIdAndUpdate(foodId, {
         $inc: { likeCount: 1 }
     })
+
+    // Notify the vendor
+    try {
+        const food = await foodModel.findById(foodId);
+        if (food && food.foodPartner) {
+            await notificationModel.create({
+                recipient: food.foodPartner,
+                recipientModel: "foodpartner",
+                sender: user._id,
+                senderModel: "user",
+                type: "like",
+                food: foodId,
+                message: `${user.fullName} liked your post "${food.name}"`
+            });
+        }
+    } catch (e) {
+        console.error("Notification error:", e.message);
+    }
 
     res.status(201).json({
         message: "Food liked successfully",
@@ -115,6 +198,24 @@ async function saveFood(req, res) {
         $inc: { savesCount: 1 }
     })
 
+    // Notify the vendor
+    try {
+        const food = await foodModel.findById(foodId);
+        if (food && food.foodPartner) {
+            await notificationModel.create({
+                recipient: food.foodPartner,
+                recipientModel: "foodpartner",
+                sender: user._id,
+                senderModel: "user",
+                type: "save",
+                food: foodId,
+                message: `${user.fullName} saved your post "${food.name}"`
+            });
+        }
+    } catch (e) {
+        console.error("Notification error:", e.message);
+    }
+
     res.status(201).json({
         message: "Food saved successfully",
         save
@@ -152,6 +253,25 @@ async function addComment(req, res) {
         user: user._id,
         comment
     });
+
+    // Notify the vendor
+    try {
+        const food = await foodModel.findById(foodId);
+        if (food && food.foodPartner) {
+            await notificationModel.create({
+                recipient: food.foodPartner,
+                recipientModel: "foodpartner",
+                sender: user._id,
+                senderModel: "user",
+                type: "comment",
+                food: foodId,
+                comment: newComment._id,
+                message: `${user.fullName} commented on "${food.name}": "${comment.substring(0, 50)}"`
+            });
+        }
+    } catch (e) {
+        console.error("Notification error:", e.message);
+    }
 
     res.status(201).json({
         message: "Comment added successfully",
@@ -221,7 +341,7 @@ async function replyToComment(req, res) {
         const { comment } = req.body;
         const userId = req.user._id;
 
-        const parent = await commentModel.findById(parentCommentId);
+        const parent = await commentModel.findById(parentCommentId).populate("user", "fullName");
         if (!parent) {
             return res.status(404).json({ message: "Parent comment not found" });
         }
@@ -232,6 +352,44 @@ async function replyToComment(req, res) {
             comment,
             parentComment: parentCommentId
         });
+
+        // Notify the original commenter that someone replied
+        try {
+            if (parent.user._id.toString() !== userId.toString()) {
+                const food = await foodModel.findById(parent.food);
+                await notificationModel.create({
+                    recipient: parent.user._id,
+                    recipientModel: "user",
+                    sender: userId,
+                    senderModel: "user",
+                    type: "reply",
+                    food: parent.food,
+                    comment: reply._id,
+                    message: `${req.user.fullName} replied to your comment: "${comment.substring(0, 50)}"`
+                });
+            }
+        } catch (e) {
+            console.error("Notification error:", e.message);
+        }
+
+        // Also notify vendor about the comment
+        try {
+            const food = await foodModel.findById(parent.food);
+            if (food && food.foodPartner) {
+                await notificationModel.create({
+                    recipient: food.foodPartner,
+                    recipientModel: "foodpartner",
+                    sender: userId,
+                    senderModel: "user",
+                    type: "comment",
+                    food: parent.food,
+                    comment: reply._id,
+                    message: `${req.user.fullName} replied to a comment on "${food.name}"`
+                });
+            }
+        } catch (e) {
+            console.error("Notification error:", e.message);
+        }
 
         res.status(201).json({
             message: "Reply added successfully",
@@ -247,6 +405,7 @@ async function replyToComment(req, res) {
 module.exports = {
     createFood,
     getFoodItems,
+    searchByHashtag,
     likeFood,
     saveFood,
     getSaveFood,

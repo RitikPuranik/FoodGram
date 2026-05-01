@@ -24,6 +24,12 @@ router.get("/",
     foodController.getFoodItems
 )
 
+/* GET /api/food/search?q=pizza [protected] — fuzzy hashtag search */
+router.get("/search",
+    authMiddleware.authUserMiddleware,
+    foodController.searchByHashtag
+)
+
 router.post('/like',
     authMiddleware.authUserMiddleware,
     foodController.likeFood

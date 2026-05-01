@@ -23,6 +23,11 @@ const foodSchema = new mongoose.Schema({
     savesCount: {
         type: Number,
         default: 0
+    },
+    hashtags: {
+        type: [String],
+        default: [],
+        index: true  // Index for fast hashtag queries
     }
 })
 

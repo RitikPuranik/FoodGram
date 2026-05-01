@@ -1,0 +1,258 @@
+.notifications-page {
+  padding: var(--space-lg);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.notif-header {
+  margin-bottom: var(--space-xl);
+}
+
+.notif-header h1 {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: var(--space-md);
+}
+
+.notif-filters {
+  display: flex;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.notif-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.notif-filter-pill {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.notif-filter-pill:hover {
+  border-color: var(--primary);
+  color: var(--text-primary);
+}
+
+.notif-filter-pill.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* Section Title */
+.notif-section-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+/* Follow Section (Users) */
+.notif-follow-section {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.notif-vendor-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.notif-vendor-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+}
+
+.notif-vendor-card:hover {
+  background: var(--bg-surface);
+}
+
+.notif-vendor-avatar {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border-radius: 50%;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+}
+
+.notif-vendor-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-vendor-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.notif-vendor-meta {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.notif-follow-btn {
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  background: var(--primary);
+  color: white;
+  border: 1px solid var(--primary);
+}
+
+.notif-follow-btn:hover {
+  background: var(--primary-dark);
+  transform: scale(1.03);
+}
+
+.notif-follow-btn.following {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+.notif-follow-btn.following:hover {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  background: rgba(231, 76, 60, 0.06);
+}
+
+/* Groups */
+.notif-group {
+  margin-bottom: var(--space-xl);
+}
+
+.notif-group-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: var(--space-md);
+  padding-left: var(--space-xs);
+}
+
+/* Notification Item */
+.notif-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
+  position: relative;
+  cursor: pointer;
+}
+
+.notif-item:hover {
+  background: var(--bg-surface);
+}
+
+.notif-item.unread {
+  background: rgba(107, 142, 35, 0.04);
+}
+
+.notif-icon {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-content p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.notif-content strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.notif-food-name {
+  color: var(--primary-light);
+}
+
+.notif-time {
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+  display: block;
+}
+
+.notif-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  min-width: 8px;
+}
+
+/* Empty */
+.notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-3xl);
+  color: var(--text-tertiary);
+  gap: var(--space-sm);
+}
+
+.notif-empty h3 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.notif-empty p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .notifications-page {
+    padding: var(--space-md);
+  }
+
+  .notif-header h1 {
+    font-size: 1.3rem;
+  }
+}

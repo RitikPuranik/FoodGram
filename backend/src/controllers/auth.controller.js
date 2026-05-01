@@ -43,6 +43,8 @@ async function registerUser(req, res) {
                 _id: user._id,
                 email: user.email,
                 fullName: user.fullName,
+                avatar: user.avatar || null,
+                bio: user.bio || ''
             },
         });
     } 
@@ -84,7 +86,9 @@ async function loginUser(req, res) {
         user: {
             _id: user._id,
             email: user.email,
-            fullName: user.fullName
+            fullName: user.fullName,
+            avatar: user.avatar || null,
+            bio: user.bio || ''
         }
     })
 }
@@ -133,7 +137,9 @@ async function registerFoodPartner(req, res) {
             name: foodPartner.name,
             address: foodPartner.address,
             contactName: foodPartner.contactName,
-            phone: foodPartner.phone
+            phone: foodPartner.phone,
+            avatar: foodPartner.avatar || null,
+            bio: foodPartner.bio || ''
         }
     })
 }
@@ -169,7 +175,9 @@ async function loginFoodPartner(req, res) {
         foodPartner: {
             _id: foodPartner._id,
             email: foodPartner.email,
-            name: foodPartner.name
+            name: foodPartner.name,
+            avatar: foodPartner.avatar || null,
+            bio: foodPartner.bio || ''
         }
     })
 }

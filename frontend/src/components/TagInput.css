@@ -1,0 +1,94 @@
+.tag-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tag-input-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tag-input-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  cursor: text;
+  transition: all var(--transition-base);
+  min-height: 52px;
+}
+
+.tag-input-field:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.15);
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(255, 87, 34, 0.2));
+  border: 1px solid rgba(255, 87, 34, 0.4);
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-light);
+  animation: scaleIn 200ms ease-out forwards;
+  white-space: nowrap;
+}
+
+.tag-chip-text {
+  color: var(--primary-light);
+}
+
+.tag-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255, 87, 34, 0.2);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  line-height: 1;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+}
+
+.tag-chip-remove:hover {
+  background: var(--accent-red);
+  color: white;
+  transform: scale(1.2);
+}
+
+.tag-input-text {
+  flex: 1;
+  min-width: 120px;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 2px 0;
+}
+
+.tag-input-text::placeholder {
+  color: var(--text-tertiary);
+}
+
+.tag-input-hint {
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  padding-left: 2px;
+}
