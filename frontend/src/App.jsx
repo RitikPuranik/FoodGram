@@ -10,6 +10,7 @@ import Explore from './pages/Explore';
 import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import Upload from './pages/Upload';
+import VendorProfile from './pages/VendorProfile';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -32,6 +33,7 @@ function App() {
           <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
+          <Route path="/vendor/:id" element={<VendorProfile />} />
         </Routes>
       </main>
     </div>

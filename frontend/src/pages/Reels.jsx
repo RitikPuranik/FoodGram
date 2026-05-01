@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Heart, MessageCircle, Bookmark, Volume2, VolumeX, Play } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { getFoodItems, likeFood, saveFood } from '../api/food';
 import CommentSheet from '../components/CommentSheet';
+import Avatar from '../components/Avatar';
 import Loader from '../components/Loader';
 import './Reels.css';
 
@@ -47,6 +49,7 @@ export default function Reels() {
 }
 
 function ReelItem({ food }) {
+  const navigate = useNavigate();
   const videoRef = useRef(null);
   const itemRef = useRef(null);
   const [playing, setPlaying] = useState(false);
@@ -151,12 +154,24 @@ function ReelItem({ food }) {
 
         {/* Bottom info */}
         <div className="reel-info">
-          <div className="reel-info-avatar">
-            {food?.name?.charAt(0)?.toUpperCase() || 'F'}
-          </div>
-          <div className="reel-info-text">
-            <h3>{food?.name || 'Delicious Food'}</h3>
-            {food?.description && <p>{food.description}</p>}
+          <div
+            className="reel-vendor-link"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (food?.foodPartner?._id) navigate(`/vendor/${food.foodPartner._id}`);
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: food?.foodPartner?._id ? 'pointer' : 'default' }}
+          >
+            <Avatar
+              src={food?.foodPartner?.avatar || null}
+              name={food?.foodPartner?.name || food?.name || 'F'}
+              size={40}
+              className="reel-info-avatar-img"
+            />
+            <div className="reel-info-text">
+              <h3>{food?.name || 'Delicious Food'}</h3>
+              {food?.description && <p>{food.description}</p>}
+            </div>
           </div>
         </div>
       </div>

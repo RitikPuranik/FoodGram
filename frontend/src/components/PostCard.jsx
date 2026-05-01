@@ -20,6 +20,9 @@ export default function PostCard({ food, index = 0 }) {
   const cardRef = useRef(null);
   const lastTap = useRef(0);
 
+  // Resolve vendor ID whether foodPartner is a populated object or a raw string ID
+  const vendorId = food?.foodPartner?._id || (typeof food?.foodPartner === 'string' ? food.foodPartner : null);
+
   // Intersection observer for autoplay
   useEffect(() => {
     const video = videoRef.current;
@@ -82,6 +85,11 @@ export default function PostCard({ food, index = 0 }) {
     }
   };
 
+  const handleVendorClick = (e) => {
+    e.stopPropagation();
+    if (vendorId) navigate(`/vendor/${vendorId}`);
+  };
+
   return (
     <>
       <motion.article
@@ -134,6 +142,11 @@ export default function PostCard({ food, index = 0 }) {
         {/* Post Info */}
         <div className="post-info">
           <div className="post-info-left">
+            <div
+              className="post-vendor-link"
+              onClick={handleVendorClick}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: vendorId ? 'pointer' : 'default' }}
+            >
             <Avatar
               src={food?.foodPartner?.avatar || null}
               name={food?.name || 'F'}
@@ -162,6 +175,7 @@ export default function PostCard({ food, index = 0 }) {
                   ))}
                 </div>
               )}
+            </div>
             </div>
           </div>
 

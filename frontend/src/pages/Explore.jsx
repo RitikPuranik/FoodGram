@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useSearchParams } from 'react-router-dom';import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play, Heart, X, Hash, TrendingUp,
   ChevronLeft, ChevronRight, MessageCircle,
@@ -169,6 +168,7 @@ function InlineComments({ foodId }) {
 ─────────────────────────────────────────── */
 function PostLightbox({ foods, selectedIndex, onClose, onNavigate, onTagClick }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const food = foods[selectedIndex];
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -253,7 +253,16 @@ function PostLightbox({ foods, selectedIndex, onClose, onNavigate, onTagClick })
 
           {/* Header */}
           <div className="lb-header">
-            <div className="lb-author">
+            <div
+              className="lb-author"
+              onClick={() => {
+                if (food?.foodPartner?._id) {
+                  onClose();
+                  navigate(`/vendor/${food.foodPartner._id}`);
+                }
+              }}
+              style={{ cursor: food?.foodPartner?._id ? 'pointer' : 'default' }}
+            >
               <Avatar
                 src={food?.foodPartner?.avatar || null}
                 name={food?.name || 'F'}

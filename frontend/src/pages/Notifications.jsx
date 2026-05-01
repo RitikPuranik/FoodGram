@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Heart, MessageCircle, Bookmark, UserPlus, Bell, UtensilsCrossed, Reply } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +9,7 @@ import './Notifications.css';
 
 export default function Notifications() {
   const { role } = useAuth();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +43,10 @@ export default function Notifications() {
     setLoading(false);
   };
 
-  const handleFollow = async (vendorId) => {
+  const handleFollow = async (e, vendorId) => {
+    e.stopPropagation(); // prevent navigating to profile when clicking Follow button
     try {
       const res = await followVendor(vendorId);
-      // Update local state
       setVendors(prev => prev.map(v =>
         v._id === vendorId
           ? { ...v, isFollowed: res.data.followed, followerCount: v.followerCount + (res.data.followed ? 1 : -1) }
@@ -149,6 +151,8 @@ export default function Notifications() {
                 className="notif-vendor-card"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
+                onClick={() => navigate(`/vendor/${vendor._id}`)}
+                style={{ cursor: 'pointer' }}
               >
                 <div className="notif-vendor-avatar">
                   {vendor.name?.charAt(0)?.toUpperCase() || 'V'}
@@ -161,7 +165,7 @@ export default function Notifications() {
                 </div>
                 <button
                   className={`notif-follow-btn ${vendor.isFollowed ? 'following' : ''}`}
-                  onClick={() => handleFollow(vendor._id)}
+                  onClick={(e) => handleFollow(e, vendor._id)}
                 >
                   {vendor.isFollowed ? 'Following' : 'Follow'}
                 </button>

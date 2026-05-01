@@ -1,0 +1,239 @@
+.vendor-page {
+  min-height: 100vh;
+  padding: 1rem 1rem 4rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.vendor-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--text-secondary, #aaa);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-bottom: 1rem;
+  transition: color 0.2s;
+}
+.vendor-back-btn:hover {
+  color: var(--text-primary, #fff);
+}
+
+/* Header card */
+.vendor-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 1.75rem 1.5rem;
+  border-radius: 20px;
+  margin-bottom: 1.25rem;
+}
+
+.vendor-avatar {
+  flex-shrink: 0;
+}
+
+.vendor-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.vendor-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.vendor-role {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #aaa);
+  margin: 0;
+}
+
+.vendor-bio {
+  font-size: 0.88rem;
+  color: var(--text-secondary, #bbb);
+  margin: 4px 0 0;
+  max-width: 340px;
+}
+
+.vendor-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.vendor-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #aaa);
+}
+
+/* Stats */
+.vendor-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 4px;
+}
+.vendor-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.vendor-stat-num {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.vendor-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #aaa);
+}
+
+/* Grid */
+.vendor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3px;
+}
+
+.vendor-grid-item {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--surface, #1a1a1a);
+}
+
+.vendor-grid-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s;
+}
+.vendor-grid-item:hover .vendor-grid-video {
+  transform: scale(1.05);
+}
+
+.vendor-grid-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 8px 10px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.vendor-grid-item:hover .vendor-grid-overlay {
+  opacity: 1;
+}
+.vendor-grid-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+/* Empty */
+.vendor-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 3rem 1rem;
+  color: var(--text-secondary, #aaa);
+}
+
+/* Error */
+.vendor-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+  padding: 4rem 1rem;
+}
+.vendor-error-icon { font-size: 3rem; }
+
+/* Modal */
+.vendor-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  padding: 1rem;
+}
+
+.vendor-modal {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.vendor-modal-video {
+  width: 100%;
+  aspect-ratio: 9/14;
+  object-fit: cover;
+  display: block;
+  max-height: 60vh;
+}
+
+.vendor-modal-info {
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.vendor-modal-info h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.vendor-modal-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #aaa);
+}
+.vendor-modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.vendor-modal-tag {
+  font-size: 0.75rem;
+  color: var(--primary, #f97316);
+  background: rgba(249,115,22,0.12);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.vendor-modal-likes {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
