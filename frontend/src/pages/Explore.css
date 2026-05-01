@@ -59,8 +59,8 @@
 .explore-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  grid-auto-flow: dense; /* Crucial for masonry-like filling */
+  gap: 3px;
+  grid-auto-flow: dense;
 }
 
 @media (max-width: 768px) {
@@ -68,7 +68,8 @@
     padding: var(--space-md);
   }
   .explore-grid {
-    gap: 4px;
+    gap: 2px;
+    grid-template-columns: repeat(3, 1fr);
   }
   .explore-search-bar {
     padding: 10px 16px;
@@ -82,15 +83,14 @@
   aspect-ratio: 1 / 1;
   background: var(--bg-surface);
   overflow: hidden;
-  border-radius: var(--radius-md);
   cursor: pointer;
   transform: translateZ(0); /* Hardware acceleration */
 }
 
+/* Wide tile: spans 2 columns, same 1-row height */
 .explore-tile-wide {
   grid-column: span 2;
-  grid-row: span 2;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1;
 }
 
 .explore-tile-video {

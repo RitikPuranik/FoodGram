@@ -22,10 +22,21 @@ async function updateProfile(req, res) {
         if (req.body.name !== undefined)     updates.name     = req.body.name.trim();
         if (req.body.bio  !== undefined)     updates.bio      = req.body.bio.trim();
 
-        // Avatar upload
+        // Avatar upload — delete old one from cloud first
         if (req.file) {
+            // Delete the existing avatar from ImageKit if one exists
+            const oldFileId = currentDoc.avatarFileId;
+            if (oldFileId) {
+                await storageService.deleteFile(oldFileId);
+            } else if (currentDoc.avatar) {
+                // Fallback for older accounts without stored fileId
+                const fileId = await storageService.getFileIdByUrl(currentDoc.avatar);
+                if (fileId) await storageService.deleteFile(fileId);
+            }
+
             const result = await storageService.uploadFile(req.file.buffer, `avatar-${uuid()}`);
             updates.avatar = result.url;
+            updates.avatarFileId = result.fileId || null;
         }
 
         if (Object.keys(updates).length === 0) {

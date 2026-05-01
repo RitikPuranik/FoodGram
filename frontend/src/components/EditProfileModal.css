@@ -4,20 +4,21 @@
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(12px);
   z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .epm-modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   z-index: 501;
   width: min(480px, 95vw);
+  max-height: 90vh;
+  overflow-y: auto;
   border-radius: var(--radius-xl);
   background: var(--bg-secondary) !important;
   border: 1px solid var(--border-light);
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
-  overflow: hidden;
 }
 
 /* Header */

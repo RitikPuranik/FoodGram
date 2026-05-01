@@ -38,6 +38,7 @@ async function createFood(req, res) {
         name: req.body.name,
         description: req.body.description,
         video: fileUploadResult.url,
+        videoFileId: fileUploadResult.fileId || null,
         foodPartner: req.foodPartner._id,
         hashtags
     })
@@ -402,6 +403,41 @@ async function replyToComment(req, res) {
 }
 
 
+async function deleteFood(req, res) {
+    const { foodId } = req.params;
+
+    const food = await foodModel.findById(foodId);
+    if (!food) {
+        return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Only the owning food partner can delete their post
+    if (food.foodPartner.toString() !== req.foodPartner._id.toString()) {
+        return res.status(403).json({ message: "Not authorized to delete this post" });
+    }
+
+    // Delete video from ImageKit cloud storage
+    if (food.videoFileId) {
+        await storageService.deleteFile(food.videoFileId);
+    } else if (food.video) {
+        // Fallback: look up fileId by URL (for older posts without stored fileId)
+        const fileId = await storageService.getFileIdByUrl(food.video);
+        if (fileId) await storageService.deleteFile(fileId);
+    }
+
+    // Cascade-delete all related data
+    const comments = await commentModel.find({ food: foodId });
+    for (const c of comments) {
+        await deleteCommentRecursive(c._id);
+    }
+    await likeModel.deleteMany({ food: foodId });
+    await saveModel.deleteMany({ food: foodId });
+    await notificationModel.deleteMany({ food: foodId });
+    await foodModel.findByIdAndDelete(foodId);
+
+    res.status(200).json({ message: "Post deleted successfully" });
+}
+
 module.exports = {
     createFood,
     getFoodItems,
@@ -413,5 +449,6 @@ module.exports = {
     getComments,
     deleteComment,
     deleteCommentRecursive,
-    replyToComment
+    replyToComment,
+    deleteFood
 }

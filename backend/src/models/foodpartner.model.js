@@ -30,6 +30,10 @@ const foodPartnerSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    avatarFileId: {
+        type: String,
+        default: null   // ImageKit fileId for avatar deletion
+    },
     bio: {
         type: String,
         default: ''

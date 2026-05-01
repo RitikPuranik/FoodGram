@@ -63,14 +63,13 @@ export default function EditProfileModal({ isOpen, onClose }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          <motion.div
-            className="epm-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
+        <motion.div
+          className="epm-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
           <motion.div
             className="epm-modal glass"
             initial={{ opacity: 0, scale: 0.92, y: 30 }}
@@ -164,7 +163,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
               </div>
             </form>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

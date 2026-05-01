@@ -9,6 +9,10 @@ const foodSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    videoFileId: {
+        type: String,
+        default: null,   // ImageKit fileId — used for deletion
+    },
     description: {
         type: String,
     },

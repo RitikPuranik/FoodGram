@@ -66,4 +66,10 @@ router.post("/comment/:parentCommentId/reply",
 );
 
 
+/* DELETE /api/food/:foodId [protected — food partner only] */
+router.delete('/:foodId',
+    authMiddleware.authFoodPartnerMiddleware,
+    foodController.deleteFood
+);
+
 module.exports = router

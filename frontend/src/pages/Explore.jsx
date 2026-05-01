@@ -393,22 +393,31 @@ export default function Explore() {
   const openPost = (idx) => setSelectedIndex(idx);
   const closePost = () => setSelectedIndex(null);
 
-  // Grid
+  // Grid: repeating pattern of [3 normal] → [wide + 1 normal] → [3 normal] → [1 normal + wide]
+  // This matches Instagram-style explore where every 5th item in a group is wide (2-col span)
   const buildGridItems = (items) => {
-    const out = []; let idx = 0, wideRow = 0;
+    const out = [];
+    let idx = 0;
+    let cycle = 0; // alternates wide-left vs wide-right
+
     while (idx < items.length) {
-      for (let i = 0; i < 3 && idx < items.length; i++, idx++)
+      // Block A: 3 square tiles
+      for (let i = 0; i < 3 && idx < items.length; i++, idx++) {
         out.push({ food: items[idx], span: 1, origIdx: idx });
-      if (idx < items.length) {
-        if (wideRow % 2 === 0) {
-          out.push({ food: items[idx], span: 2, origIdx: idx }); idx++;
-          if (idx < items.length) { out.push({ food: items[idx], span: 1, origIdx: idx }); idx++; }
-        } else {
-          out.push({ food: items[idx], span: 1, origIdx: idx }); idx++;
-          if (idx < items.length) { out.push({ food: items[idx], span: 2, origIdx: idx }); idx++; }
-        }
-        wideRow++;
       }
+      if (idx >= items.length) break;
+
+      // Block B: 1 wide tile (span 2) + 1 normal tile
+      if (cycle % 2 === 0) {
+        // wide on left
+        out.push({ food: items[idx], span: 2, origIdx: idx }); idx++;
+        if (idx < items.length) { out.push({ food: items[idx], span: 1, origIdx: idx }); idx++; }
+      } else {
+        // wide on right
+        out.push({ food: items[idx], span: 1, origIdx: idx }); idx++;
+        if (idx < items.length) { out.push({ food: items[idx], span: 2, origIdx: idx }); idx++; }
+      }
+      cycle++;
     }
     return out;
   };
