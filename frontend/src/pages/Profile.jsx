@@ -3,9 +3,11 @@ import { motion } from 'framer-motion';
 import { LogOut, Grid3X3, Bookmark, Settings, Play, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getSavedFoods, getFoodItems } from '../api/food';
+import { getFoodPartnerById } from '../api/foodPartner';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import EditProfileModal from '../components/EditProfileModal';
+import PostLightbox from '../components/PostLightbox';
 import './Profile.css';
 
 export default function Profile() {
@@ -25,15 +27,16 @@ export default function Profile() {
   const fetchData = async () => {
     if (role === 'partner') {
       try {
-        const foodRes = await getFoodItems();
-        setAllFoods(foodRes.data.foodItems || []);
+        const partnerRes = await getFoodPartnerById(user._id);
+        setAllFoods(partnerRes.data.foodPartner.foodItems || []);
       } catch (e) {}
-    }
-    try {
-      const savedRes = await getSavedFoods();
-      setSavedFoods(savedRes.data.savedFoods?.map(s => s.food) || []);
-    } catch (e) {
-      setSavedFoods([]);
+    } else {
+      try {
+        const savedRes = await getSavedFoods();
+        setSavedFoods(savedRes.data.savedFoods?.map(s => s.food) || []);
+      } catch (e) {
+        setSavedFoods([]);
+      }
     }
     setLoading(false);
   };
@@ -154,30 +157,51 @@ export default function Profile() {
                 transition={{ delay: i * 0.03 }}
                 onClick={() => setSelectedFood(food)}
               >
-                <video src={food?.video} muted preload="metadata" className="profile-grid-video"
-                  onMouseEnter={e => e.target.play()}
-                  onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
-                />
+                {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                  <img src={food.video} className="profile-grid-video" alt="Food" style={{objectFit: 'cover'}} />
+                ) : (
+                  <video muted preload="metadata" className="profile-grid-video"
+                    onMouseEnter={e => e.target.play()}
+                    onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
+                  >
+                    <source src={food?.video ? `${food.video}?tr=orig-true#t=1.0` : ''} type="video/mp4" />
+                  </video>
+                )}
                 <div className="profile-grid-overlay">
                   <div className="profile-grid-stat"><Heart size={14} fill="white" /> {food?.likeCount || 0}</div>
-                  <Play size={16} fill="white" />
+                  {food?.mediaType !== 'image' && !food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
+                    <Play size={16} fill="white" />
+                  )}
                 </div>
               </motion.div>
             ))}
           </motion.div>
         )}
 
-        {/* Preview Modal */}
+        {/* Post Lightbox Modal */}
         {selectedFood && (
-          <motion.div className="profile-modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setSelectedFood(null)}>
-            <motion.div className="profile-modal glass" initial={{ scale: 0.9 }} animate={{ scale: 1 }} onClick={e => e.stopPropagation()}>
-              <video src={selectedFood.video} autoPlay loop playsInline controls className="profile-modal-video" />
-              <div className="profile-modal-info">
-                <h3>{selectedFood.name}</h3>
-                {selectedFood.description && <p>{selectedFood.description}</p>}
-              </div>
-            </motion.div>
-          </motion.div>
+          <PostLightbox
+            foods={displayedFoods}
+            selectedIndex={displayedFoods.findIndex(f => f._id === selectedFood._id)}
+            onClose={() => setSelectedFood(null)}
+            onNavigate={(dir) => {
+              const currentIdx = displayedFoods.findIndex(f => f._id === selectedFood._id);
+              const nextIdx = currentIdx + dir;
+              if (nextIdx >= 0 && nextIdx < displayedFoods.length) {
+                setSelectedFood(displayedFoods[nextIdx]);
+              }
+            }}
+            onFoodDeleted={(id) => {
+              setAllFoods(prev => prev.filter(f => f._id !== id));
+              setSavedFoods(prev => prev.filter(f => f?._id !== id));
+              setSelectedFood(null);
+            }}
+            onFoodUpdated={(updatedFood) => {
+              setAllFoods(prev => prev.map(f => f._id === updatedFood._id ? updatedFood : f));
+              setSavedFoods(prev => prev.map(f => f?._id === updatedFood._id ? updatedFood : f));
+              setSelectedFood(updatedFood);
+            }}
+          />
         )}
       </div>
 

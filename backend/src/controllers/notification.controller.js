@@ -5,7 +5,7 @@ async function getUserNotifications(req, res) {
         const userId = req.user._id;
         const notifications = await notificationModel
             .find({ recipient: userId, recipientModel: "user" })
-            .populate("sender", "name contactName fullName")
+            .populate("sender", "name contactName fullName avatar")
             .populate("food", "name video")
             .populate("comment", "comment")
             .sort({ createdAt: -1 })
@@ -22,7 +22,7 @@ async function getVendorNotifications(req, res) {
         const vendorId = req.foodPartner._id;
         const notifications = await notificationModel
             .find({ recipient: vendorId, recipientModel: "foodpartner" })
-            .populate("sender", "fullName email")
+            .populate("sender", "fullName email avatar")
             .populate("food", "name video")
             .populate("comment", "comment")
             .sort({ createdAt: -1 })

@@ -208,3 +208,31 @@
   border-color: rgba(255, 87, 34, 0.4);
   transform: translateY(-1px);
 }
+@media (max-width: 768px) {
+  .post-info {
+    padding: var(--space-md);
+  }
+  
+  .post-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 0.9rem;
+  }
+  
+  .post-title {
+    font-size: 0.95rem;
+  }
+  
+  .post-desc {
+    font-size: 0.8rem;
+  }
+  
+  .post-action-btn {
+    padding: 6px 10px;
+  }
+  
+  .post-action-btn span {
+    font-size: 0.8rem;
+  }
+}

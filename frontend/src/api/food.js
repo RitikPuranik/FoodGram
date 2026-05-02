@@ -1,6 +1,6 @@
 import api from './axios';
 
-export const getFoodItems = () => api.get('/food');
+export const getFoodItems = (page = 1, limit = 10) => api.get(`/food?page=${page}&limit=${limit}`);
 
 export const createFood = (formData) =>
   api.post('/food', formData, {
@@ -24,5 +24,9 @@ export const deleteComment = (commentId) =>
 export const replyToComment = (parentCommentId, comment) =>
   api.post(`/food/comment/${parentCommentId}/reply`, { comment });
 
-export const searchFoodByHashtag = (query) =>
-  api.get(`/food/search?q=${encodeURIComponent(query)}`);
+export const searchFoodByHashtag = (query, page = 1, limit = 10) =>
+  api.get(`/food/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
+
+export const deleteFood = (foodId) => api.delete(`/food/${foodId}`);
+
+export const updateFood = (foodId, data) => api.put(`/food/${foodId}`, data);

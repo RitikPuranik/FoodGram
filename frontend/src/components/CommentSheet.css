@@ -213,16 +213,37 @@
 .toggle-replies-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.72rem;
-  color: var(--primary-light);
-  font-weight: 600;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
   transition: color var(--transition-fast);
-  padding: 2px 0;
+  padding: 4px 0;
+  margin-left: 8px;
+}
+
+.toggle-line {
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background-color: var(--text-tertiary);
 }
 
 .toggle-replies-btn:hover {
-  color: var(--primary);
+  color: var(--text-primary);
+}
+
+.toggle-replies-btn:hover .toggle-line {
+  background-color: var(--text-primary);
+}
+
+.comment-mention {
+  color: #3b82f6; /* A nice blue color for mentions */
+  cursor: pointer;
+}
+
+.comment-mention:hover {
+  text-decoration: underline;
 }
 
 .comment-empty {

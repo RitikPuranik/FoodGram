@@ -5,25 +5,35 @@ import { getFoodItems, likeFood, saveFood } from '../api/food';
 import CommentSheet from '../components/CommentSheet';
 import Avatar from '../components/Avatar';
 import Loader from '../components/Loader';
+import EndOfFeed from '../components/EndOfFeed';
 import './Reels.css';
 
 export default function Reels() {
   const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
-    fetchFoods();
-  }, []);
+    fetchFoods(page);
+  }, [page]);
 
-  const fetchFoods = async () => {
+  const fetchFoods = async (pageNum) => {
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+
     try {
-      const res = await getFoodItems();
-      setFoods(res.data.foodItems || []);
+      const res = await getFoodItems(pageNum, 10); // Load 10 reels at a time
+      const newFoods = res.data.foodItems || [];
+      setFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
+      setHasMore(res.data.hasMore);
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
+    setLoadingMore(false);
   };
 
   if (loading) return <div className="reels-page"><Loader text="Loading reels..." /></div>;
@@ -40,15 +50,25 @@ export default function Reels() {
   return (
     <div className="reels-page" ref={containerRef}>
       <div className="reels-scroll-container">
-        {foods.map((food) => (
-          <ReelItem key={food._id} food={food} />
+        {foods.map((food, index) => (
+          <ReelItem 
+            key={food._id} 
+            food={food} 
+            isLast={index === foods.length - 1}
+            onVisible={() => {
+              if (hasMore && !loadingMore) {
+                setPage(p => p + 1);
+              }
+            }}
+          />
         ))}
+        {!hasMore && foods.length > 0 && <EndOfFeed message="You've seen all the reels!" />}
       </div>
     </div>
   );
 }
 
-function ReelItem({ food }) {
+function ReelItem({ food, isLast, onVisible }) {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const itemRef = useRef(null);
@@ -69,10 +89,17 @@ function ReelItem({ food }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.7) {
-          video.currentTime = 0;
-          video.play().catch(() => {});
-          setPlaying(true);
+        if (entry.isIntersecting) {
+          if (entry.intersectionRatio > 0.7) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+            setPlaying(true);
+          }
+          
+          // Trigger load more if this is the last item
+          if (isLast && onVisible) {
+            onVisible();
+          }
         } else {
           video.pause();
           setPlaying(false);
@@ -82,7 +109,7 @@ function ReelItem({ food }) {
     );
     observer.observe(item);
     return () => observer.disconnect();
-  }, []);
+  }, [isLast, onVisible]);
 
   const togglePlay = () => {
     const v = videoRef.current;
@@ -125,18 +152,23 @@ function ReelItem({ food }) {
   return (
     <div className="reel-item" ref={itemRef}>
       <div className="reel-video-wrap" onClick={handleDoubleTap}>
-        <video
-          ref={videoRef}
-          src={food?.video}
-          loop
-          muted={muted}
-          playsInline
-          preload="metadata"
-          className="reel-video"
-        />
+        {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+          <img src={food.video} className="reel-video" alt="Food" style={{objectFit: 'cover'}} />
+        ) : (
+          <video
+            ref={videoRef}
+            loop
+            muted={muted}
+            playsInline
+            preload="metadata"
+            className="reel-video"
+          >
+            <source src={food?.video ? `${food.video}?tr=orig-true#t=1.0` : ''} type="video/mp4" />
+          </video>
+        )}
 
         {/* Pause icon */}
-        {!playing && (
+        {!playing && food?.mediaType !== 'image' && !food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
           <div className="reel-pause-overlay">
             <Play size={56} fill="white" strokeWidth={0} />
           </div>

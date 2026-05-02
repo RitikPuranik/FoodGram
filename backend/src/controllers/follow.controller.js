@@ -50,7 +50,7 @@ async function followVendor(req, res) {
 async function getFollowedVendors(req, res) {
     try {
         const userId = req.user._id;
-        const follows = await followModel.find({ follower: userId }).populate("following", "name contactName email");
+        const follows = await followModel.find({ follower: userId }).populate("following", "name contactName email avatar");
         res.status(200).json({
             message: "Followed vendors fetched",
             vendors: follows.map(f => f.following)
@@ -63,7 +63,7 @@ async function getFollowedVendors(req, res) {
 async function getAllVendors(req, res) {
     try {
         const userId = req.user._id;
-        const vendors = await foodPartnerModel.find({}).select("name contactName email");
+        const vendors = await foodPartnerModel.find({}).select("name contactName email avatar");
         const follows = await followModel.find({ follower: userId });
         const followedIds = new Set(follows.map(f => f.following.toString()));
 
@@ -75,6 +75,7 @@ async function getAllVendors(req, res) {
                 name: v.name,
                 contactName: v.contactName,
                 email: v.email,
+                avatar: v.avatar,
                 followerCount,
                 isFollowed: followedIds.has(v._id.toString())
             };

@@ -98,10 +98,15 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
       </div>
       <div className="comment-body">
         <div className="comment-header">
-          <span className="comment-author">{comment.user?.fullName || 'User'}</span>
+          <span className="comment-author">{comment.user?.username || comment.user?.fullName || 'User'}</span>
           <span className="comment-time">{timeAgo(comment.createdAt)}</span>
         </div>
-        <p className="comment-text">{comment.comment}</p>
+        <p className="comment-text">
+          {depth > 0 && comment.replyToUsername && (
+            <span className="comment-mention">@{comment.replyToUsername} </span>
+          )}
+          {comment.comment}
+        </p>
         <div className="comment-actions">
           <button
             className="comment-action-btn"
@@ -134,7 +139,7 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
               <input
                 ref={replyInputRef}
                 type="text"
-                placeholder="Write a reply..."
+                placeholder={`Replying to @${comment.user?.username || comment.user?.fullName || 'user'}...`}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleReply(comment._id)}
@@ -156,8 +161,8 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
               className="toggle-replies-btn"
               onClick={() => toggleReplies(comment._id)}
             >
-              {expandedReplies[comment._id] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              {expandedReplies[comment._id] ? 'Hide' : 'View'} {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
+              <span className="toggle-line"></span>
+              {expandedReplies[comment._id] ? 'Hide replies' : `View replies (${comment.replies.length})`}
             </button>
             <AnimatePresence>
               {expandedReplies[comment._id] && (

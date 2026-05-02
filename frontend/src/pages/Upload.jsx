@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Upload as UploadIcon, Video, CheckCircle } from 'lucide-react';
+import { Upload as UploadIcon, Video, Image as ImageIcon, CheckCircle, X } from 'lucide-react';
 import { createFood } from '../api/food';
 import TagInput from '../components/TagInput';
 import './Upload.css';
@@ -14,7 +14,18 @@ export default function Upload() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [videoFile, setVideoFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [tags, setTags] = useState([]);
+
+  useEffect(() => {
+    if (!videoFile) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(videoFile);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [videoFile]);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -87,23 +98,55 @@ export default function Upload() {
         <form className="upload-form" onSubmit={handleSubmit}>
           
           <div className="form-group">
-            <label htmlFor="video-upload">Food Video *</label>
+            <label htmlFor="video-upload">Food Media (Image or Video) *</label>
             <div className="file-upload-container">
               <input
                 id="video-upload"
                 type="file"
-                accept="video/*"
+                accept="video/*,image/*"
                 className="file-upload-input"
                 onChange={handleFileChange}
                 required
               />
               <UploadIcon size={32} className="file-upload-icon" />
-              <span className="file-upload-text">Click or drag video here</span>
-              <span className="file-upload-subtext">MP4, WebM, or Ogg (Max 50MB)</span>
+              <span className="file-upload-text">Click or drag media here</span>
+              <span className="file-upload-subtext">Images or MP4, WebM (Max 50MB)</span>
             </div>
-            {videoFile && (
-              <div className="file-preview">
-                <Video size={16} /> {videoFile.name}
+            {videoFile && previewUrl && (
+              <div className="file-preview" style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', position: 'relative' }}>
+                <button
+                  type="button"
+                  onClick={() => setVideoFile(null)}
+                  style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '-10px',
+                    background: 'var(--accent-red)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: '#fff',
+                    boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
+                    zIndex: 10
+                  }}
+                  title="Remove media"
+                >
+                  <X size={16} />
+                </button>
+                {videoFile.type.startsWith('image/') ? (
+                  <img src={previewUrl} alt="Preview" style={{ width: '100%', maxWidth: '300px', borderRadius: '8px', objectFit: 'cover' }} />
+                ) : (
+                  <video src={previewUrl} controls style={{ width: '100%', maxWidth: '300px', borderRadius: '8px' }} />
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                  {videoFile.type.startsWith('image/') ? <ImageIcon size={16} /> : <Video size={16} />} 
+                  {videoFile.name}
+                </div>
               </div>
             )}
           </div>

@@ -34,11 +34,17 @@ async function createFood(req, res) {
         )];
     }
 
+    let mediaType = 'video';
+    if (req.file.mimetype.startsWith('image/')) {
+        mediaType = 'image';
+    }
+
     const foodItem = await foodModel.create({
         name: req.body.name,
         description: req.body.description,
         video: fileUploadResult.url,
         videoFileId: fileUploadResult.fileId || null,
+        mediaType,
         foodPartner: req.foodPartner._id,
         hashtags
     })
@@ -70,10 +76,66 @@ async function createFood(req, res) {
 }
 
 async function getFoodItems(req, res) {
-    const foodItems = await foodModel.find({})
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const skip = (page - 1) * limit;
+
+    let followedVendorIds = [];
+    if (req.user) {
+        const follows = await followModel.find({ follower: req.user._id });
+        followedVendorIds = follows.map(f => f.following);
+    }
+
+    // Use aggregation to sort: followed posts first, then by date
+    const foodItems = await foodModel.aggregate([
+        {
+            $addFields: {
+                isFollowed: {
+                    $cond: {
+                        if: { $in: ["$foodPartner", followedVendorIds] },
+                        then: 1,
+                        else: 0
+                    }
+                }
+            }
+        },
+        { $sort: { isFollowed: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+            $lookup: {
+                from: 'foodpartners',
+                localField: 'foodPartner',
+                foreignField: '_id',
+                as: 'foodPartner'
+            }
+        },
+        { $unwind: { path: '$foodPartner', preserveNullAndEmptyArrays: true } },
+        {
+            $project: {
+                name: 1,
+                video: 1,
+                videoFileId: 1,
+                description: 1,
+                likeCount: 1,
+                savesCount: 1,
+                hashtags: 1,
+                createdAt: 1,
+                isFollowed: 1,
+                foodPartner: {
+                    _id: 1,
+                    name: 1,
+                    avatar: 1
+                }
+            }
+        }
+    ]);
+
     res.status(200).json({
         message: "Food items fetched successfully",
-        foodItems
+        foodItems,
+        page,
+        hasMore: foodItems.length === limit
     })
 }
 
@@ -85,22 +147,39 @@ async function getFoodItems(req, res) {
 async function searchByHashtag(req, res) {
     try {
         const rawQuery = (req.query.q || '').trim().replace(/^#+/, '').toLowerCase();
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 20;
+        const skip = (page - 1) * limit;
 
         if (!rawQuery) {
-            // No query — return all foods
-            const foodItems = await foodModel.find({}).sort({ createdAt: -1 }).limit(50);
-            return res.status(200).json({ message: 'All food items', foodItems });
+            // No query — return all foods with pagination
+            const foodItems = await foodModel.find({})
+                .populate('foodPartner', 'name avatar')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+            
+            return res.status(200).json({ 
+                message: 'All food items', 
+                foodItems,
+                page,
+                hasMore: foodItems.length === limit
+            });
         }
 
         // Partial, case-insensitive regex match against hashtags array
         const regex = new RegExp(rawQuery, 'i');
         const foodItems = await foodModel.find({ hashtags: { $elemMatch: { $regex: regex } } })
+            .populate('foodPartner', 'name avatar')
             .sort({ likeCount: -1 })
-            .limit(100);
+            .skip(skip)
+            .limit(limit);
 
         res.status(200).json({
             message: `Search results for "${rawQuery}"`,
-            foodItems
+            foodItems,
+            page,
+            hasMore: foodItems.length === limit
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -286,24 +365,39 @@ async function getComments(req, res) {
 
         const allComments = await commentModel
             .find({ food: foodId })
-            .populate("user", "fullName email")
+            .populate("user", "fullName email username avatar")
             .sort({ createdAt: 1 })
             .lean();
 
-        function buildTree(parentId = null) {
-            return allComments
-                .filter(c => {
-                    const parent = c.parentComment ? String(c.parentComment) : null;
-                    const target = parentId ? String(parentId) : null;
-                    return parent === target;
-                })
-                .map(c => ({
-                    ...c,
-                    replies: buildTree(c._id)
-                }));
-        }
+        const topLevelComments = allComments.filter(c => !c.parentComment);
 
-        const commentTree = buildTree(null);
+        const commentTree = topLevelComments.map(top => {
+            const replies = [];
+            
+            function findDescendants(parentId) {
+                const children = allComments.filter(c => String(c.parentComment) === String(parentId));
+                for (let child of children) {
+                    // Attach who they are replying to
+                    const parent = allComments.find(p => String(p._id) === String(child.parentComment));
+                    if (parent && parent.user) {
+                        child.replyToUsername = parent.user.username || parent.user.fullName;
+                    }
+                    replies.push(child);
+                    findDescendants(child._id);
+                }
+            }
+            
+            findDescendants(top._id);
+            
+            // Sort replies by createdAt
+            replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            
+            return {
+                ...top,
+                replies
+            };
+        });
+
 
         res.status(200).json({
             message: "Comments fetched successfully",
@@ -438,6 +532,34 @@ async function deleteFood(req, res) {
     res.status(200).json({ message: "Post deleted successfully" });
 }
 
+async function updateFood(req, res) {
+    const { foodId } = req.params;
+
+    const food = await foodModel.findById(foodId);
+    if (!food) {
+        return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Only the owning food partner can edit their post
+    if (food.foodPartner.toString() !== req.foodPartner._id.toString()) {
+        return res.status(403).json({ message: "Not authorized to edit this post" });
+    }
+
+    const { name, description, hashtags } = req.body;
+    if (name) food.name = name;
+    if (description !== undefined) food.description = description;
+
+    if (hashtags) {
+        const raw = Array.isArray(hashtags) ? hashtags : String(hashtags).split(',');
+        food.hashtags = [...new Set(
+            raw.map(t => t.trim().replace(/^#+/, '').toLowerCase()).filter(t => t.length > 0)
+        )];
+    }
+
+    await food.save();
+    res.status(200).json({ message: "Post updated successfully", food });
+}
+
 module.exports = {
     createFood,
     getFoodItems,
@@ -450,5 +572,6 @@ module.exports = {
     deleteComment,
     deleteCommentRecursive,
     replyToComment,
-    deleteFood
+    deleteFood,
+    updateFood
 }

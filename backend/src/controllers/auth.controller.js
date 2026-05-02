@@ -20,10 +20,15 @@ async function registerUser(req, res) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const base = fullName.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const randomSuffix = Math.floor(Math.random() * 10000);
+        const username = `${base}_${randomSuffix}`;
+
         const user = await userModel.create({
         fullName,
         email,
         password: hashedPassword,
+        username,
         });
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -43,6 +48,7 @@ async function registerUser(req, res) {
                 _id: user._id,
                 email: user.email,
                 fullName: user.fullName,
+                username: user.username,
                 avatar: user.avatar || null,
                 bio: user.bio || ''
             },
@@ -87,6 +93,7 @@ async function loginUser(req, res) {
             _id: user._id,
             email: user.email,
             fullName: user.fullName,
+            username: user.username,
             avatar: user.avatar || null,
             bio: user.bio || ''
         }

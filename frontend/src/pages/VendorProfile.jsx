@@ -5,6 +5,7 @@ import { ArrowLeft, Heart, Play, MapPin, Phone } from 'lucide-react';
 import { getFoodPartnerById } from '../api/foodPartner';
 import Avatar from '../components/Avatar';
 import Loader from '../components/Loader';
+import PostLightbox from '../components/PostLightbox';
 import './VendorProfile.css';
 
 export default function VendorProfile() {
@@ -117,64 +118,46 @@ export default function VendorProfile() {
               transition={{ delay: i * 0.04 }}
               onClick={() => setSelectedFood(food)}
             >
-              <video
-                src={food.video}
-                muted
-                preload="metadata"
-                className="vendor-grid-video"
-                onMouseEnter={e => e.target.play()}
-                onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
-              />
+              {food.mediaType === 'image' || food.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                <img src={food.video} className="vendor-grid-video" alt="Food" style={{objectFit: 'cover'}} />
+              ) : (
+                <video
+                  muted
+                  preload="metadata"
+                  className="vendor-grid-video"
+                  onMouseEnter={e => e.target.play()}
+                  onMouseLeave={e => { e.target.pause(); e.target.currentTime = 0; }}
+                >
+                  <source src={`${food.video}?tr=orig-true#t=1.0`} type="video/mp4" />
+                </video>
+              )}
               <div className="vendor-grid-overlay">
                 <div className="vendor-grid-stat">
                   <Heart size={13} fill="white" /> {food.likeCount || 0}
                 </div>
-                <Play size={15} fill="white" />
+                {food.mediaType !== 'image' && !food.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
+                  <Play size={15} fill="white" />
+                )}
               </div>
             </motion.div>
           ))}
         </motion.div>
       )}
 
-      {/* Preview modal */}
+      {/* Post Lightbox Modal */}
       {selectedFood && (
-        <motion.div
-          className="vendor-modal-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          onClick={() => setSelectedFood(null)}
-        >
-          <motion.div
-            className="vendor-modal glass"
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            onClick={e => e.stopPropagation()}
-          >
-            <video
-              src={selectedFood.video}
-              autoPlay
-              loop
-              playsInline
-              controls
-              className="vendor-modal-video"
-            />
-            <div className="vendor-modal-info">
-              <h3>{selectedFood.name}</h3>
-              {selectedFood.description && <p>{selectedFood.description}</p>}
-              {selectedFood.hashtags?.length > 0 && (
-                <div className="vendor-modal-tags">
-                  {selectedFood.hashtags.map(tag => (
-                    <span key={tag} className="vendor-modal-tag">#{tag}</span>
-                  ))}
-                </div>
-              )}
-              <div className="vendor-modal-likes">
-                <Heart size={16} fill="var(--accent-red)" color="var(--accent-red)" />
-                {selectedFood.likeCount || 0} likes
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
+        <PostLightbox
+          foods={foodItems}
+          selectedIndex={foodItems.findIndex(f => f._id === selectedFood._id)}
+          onClose={() => setSelectedFood(null)}
+          onNavigate={(dir) => {
+            const currentIdx = foodItems.findIndex(f => f._id === selectedFood._id);
+            const nextIdx = currentIdx + dir;
+            if (nextIdx >= 0 && nextIdx < foodItems.length) {
+              setSelectedFood(foodItems[nextIdx]);
+            }
+          }}
+        />
       )}
     </div>
   );

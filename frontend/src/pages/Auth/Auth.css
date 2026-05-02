@@ -30,148 +30,140 @@
   z-index: 0;
 }
 
-/* ===== Role Select ===== */
+/* ===== Minimalist Role Select ===== */
 .role-container {
   position: relative;
   z-index: 1;
   text-align: center;
-  max-width: 800px;
+  max-width: 760px;
   width: 100%;
 }
 
-.role-header {
+.minimalist-header {
   margin-bottom: var(--space-3xl);
 }
 
-.role-logo {
-  font-size: 4rem;
-  margin-bottom: var(--space-md);
-  filter: drop-shadow(0 0 20px rgba(255, 87, 34, 0.4));
-  display: inline-block;
+.minimalist-title {
+  font-family: var(--font-heading);
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
 }
 
-.role-header h1 {
-  font-size: 3.5rem;
-  font-weight: 900;
-  margin-bottom: var(--space-sm);
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.minimalist-header p {
+  color: var(--text-tertiary);
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
-.role-header p {
-  color: var(--text-secondary);
-  font-size: 1.2rem;
-  font-weight: 500;
-}
-
-.role-cards {
+.minimalist-cards {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-xl);
 }
 
 @media (max-width: 600px) {
-  .role-cards {
+  .minimalist-cards {
     grid-template-columns: 1fr;
-    gap: var(--space-md);
+    gap: var(--space-lg);
   }
 
-  .role-header h1 {
-    font-size: 2.5rem;
+  .minimalist-title {
+    font-size: 2.4rem;
   }
 }
 
-.role-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-xl);
-  padding: var(--space-2xl) var(--space-lg);
-  text-align: left;
+.minimalist-card {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
   cursor: pointer;
-  transition: all var(--transition-spring);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
-.role-card::before {
+.minimalist-card::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--primary-gradient);
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.08), transparent 70%);
   opacity: 0;
-  transition: opacity var(--transition-base);
+  transition: opacity 0.4s ease;
   z-index: 0;
 }
 
-.role-card:hover::before {
-  opacity: 0.05;
+.minimalist-card:hover::before {
+  opacity: 1;
 }
 
-.role-card:hover {
-  border-color: var(--primary);
-  box-shadow: 0 20px 50px rgba(255, 87, 34, 0.15);
-  transform: translateY(-8px);
+.minimalist-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.role-card-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-lg);
-  background: rgba(255, 87, 34, 0.1);
+.minimalist-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
-  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+  margin-bottom: 24px;
   position: relative;
   z-index: 1;
-  border: 1px solid rgba(255, 87, 34, 0.2);
-  box-shadow: inset 0 0 20px rgba(255, 87, 34, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.4s ease;
 }
 
 .partner-icon {
-  background: rgba(229, 9, 20, 0.1);
-  color: var(--accent-red);
-  border-color: rgba(229, 9, 20, 0.2);
-  box-shadow: inset 0 0 20px rgba(229, 9, 20, 0.05);
+  color: var(--text-primary);
 }
 
-.role-card h3 {
+.minimalist-card:hover .minimalist-icon-wrapper {
+  background: var(--primary-gradient);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 8px 24px rgba(255, 87, 34, 0.3);
+  transform: scale(1.05);
+}
+
+.minimalist-card:hover .partner-icon {
+  background: linear-gradient(135deg, #FF416C 0%, #FF4B2B 100%);
+  box-shadow: 0 8px 24px rgba(255, 65, 108, 0.3);
+}
+
+.minimalist-card h3 {
+  font-family: var(--font-heading);
   font-size: 1.4rem;
-  margin-bottom: var(--space-sm);
+  font-weight: 600;
+  margin-bottom: 12px;
   color: var(--text-primary);
   position: relative;
   z-index: 1;
+  letter-spacing: -0.01em;
 }
 
-.role-card p {
+.minimalist-card p {
   font-size: 0.95rem;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.5;
   position: relative;
   z-index: 1;
-}
-
-.role-card-arrow {
-  position: absolute;
-  bottom: var(--space-xl);
-  right: var(--space-xl);
-  font-size: 1.5rem;
-  color: var(--text-tertiary);
-  transition: all var(--transition-base);
-  z-index: 1;
-  opacity: 0;
-  transform: translateX(-10px);
-}
-
-.role-card:hover .role-card-arrow {
-  color: var(--primary);
-  opacity: 1;
-  transform: translateX(0);
+  font-weight: 400;
 }
 
 /* ===== Auth Card (Login / Signup) ===== */

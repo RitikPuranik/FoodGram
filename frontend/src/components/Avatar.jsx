@@ -21,7 +21,7 @@ export default function Avatar({ src, name, size = 40, className = '', onClick }
     fontSize: size * 0.38,
     fontWeight: 800,
     color: 'white',
-    background: src ? 'transparent' : 'var(--primary-gradient)',
+    background: 'var(--primary-gradient)',
     boxShadow: '0 4px 12px rgba(255,87,34,0.25)',
     flexShrink: 0,
     cursor: onClick ? 'pointer' : 'default',

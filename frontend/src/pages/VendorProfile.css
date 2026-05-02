@@ -237,3 +237,35 @@
   font-weight: 600;
   margin-top: 4px;
 }
+@media (max-width: 768px) {
+  .vendor-page {
+    padding: 1rem 0.75rem 5rem;
+  }
+  
+  .vendor-header {
+    padding: 1.25rem 1rem;
+    border-radius: 12px;
+  }
+  
+  .vendor-stats {
+    gap: 1.25rem;
+  }
+  
+  .vendor-stat-num {
+    font-size: 1.1rem;
+  }
+  
+  .vendor-modal-overlay {
+    padding: 0;
+  }
+  
+  .vendor-modal {
+    max-width: none;
+    height: 100%;
+    border-radius: 0;
+  }
+  
+  .vendor-modal-video {
+    max-height: 70vh;
+  }
+}

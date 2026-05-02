@@ -144,7 +144,7 @@
 
 .reel-info {
   position: absolute;
-  bottom: 90px;
+  bottom: 110px;
   left: var(--space-lg);
   right: 80px;
   display: flex;
@@ -199,7 +199,7 @@
 .reel-actions {
   position: absolute;
   right: var(--space-md);
-  bottom: 110px;
+  bottom: 130px;
   display: flex;
   flex-direction: column;
   align-items: center;

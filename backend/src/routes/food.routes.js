@@ -66,6 +66,12 @@ router.post("/comment/:parentCommentId/reply",
 );
 
 
+/* PUT /api/food/:foodId [protected — food partner only] */
+router.put('/:foodId',
+    authMiddleware.authFoodPartnerMiddleware,
+    foodController.updateFood
+);
+
 /* DELETE /api/food/:foodId [protected — food partner only] */
 router.delete('/:foodId',
     authMiddleware.authFoodPartnerMiddleware,

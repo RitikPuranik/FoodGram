@@ -13,6 +13,11 @@ const foodSchema = new mongoose.Schema({
         type: String,
         default: null,   // ImageKit fileId — used for deletion
     },
+    mediaType: {
+        type: String,
+        enum: ['video', 'image'],
+        default: 'video'
+    },
     description: {
         type: String,
     },

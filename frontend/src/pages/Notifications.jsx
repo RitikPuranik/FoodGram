@@ -5,6 +5,7 @@ import { Heart, MessageCircle, Bookmark, UserPlus, Bell, UtensilsCrossed, Reply 
 import { useAuth } from '../context/AuthContext';
 import { getAllVendors, followVendor, getUserNotifications, getVendorNotifications } from '../api/notifications';
 import Loader from '../components/Loader';
+import Avatar from '../components/Avatar';
 import './Notifications.css';
 
 export default function Notifications() {
@@ -154,9 +155,7 @@ export default function Notifications() {
                 onClick={() => navigate(`/vendor/${vendor._id}`)}
                 style={{ cursor: 'pointer' }}
               >
-                <div className="notif-vendor-avatar">
-                  {vendor.name?.charAt(0)?.toUpperCase() || 'V'}
-                </div>
+                <Avatar src={vendor.avatar || null} name={vendor.name || 'V'} size={48} />
                 <div className="notif-vendor-info">
                   <span className="notif-vendor-name">{vendor.name}</span>
                   <span className="notif-vendor-meta">
@@ -204,6 +203,17 @@ export default function Notifications() {
 }
 
 function NotifGroup({ title, items, formatTime, getIcon, role }) {
+  const navigate = useNavigate();
+
+  const handleNotifClick = (n) => {
+    if (n.senderModel === 'foodpartner') {
+      navigate(`/vendor/${n.sender?._id}`);
+    } else if (n.type === 'new_post' && n.food) {
+      // For now, if it's a new post, go to the vendor who posted it
+      navigate(`/vendor/${n.sender?._id}`);
+    }
+  };
+
   return (
     <div className="notif-group">
       <h3 className="notif-group-title">{title}</h3>
@@ -217,9 +227,18 @@ function NotifGroup({ title, items, formatTime, getIcon, role }) {
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.04 }}
+            onClick={() => handleNotifClick(n)}
           >
-            <div className="notif-icon" style={{ background: `${color}20`, color }}>
-              <Icon size={18} />
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <Avatar src={n.sender?.avatar || null} name={senderName} size={44} />
+              <div style={{ 
+                position: 'absolute', bottom: -2, right: -2, 
+                background: color, borderRadius: '50%', padding: '4px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '2px solid var(--bg-card)'
+              }}>
+                <Icon size={10} color="white" />
+              </div>
             </div>
             <div className="notif-content">
               <p>
@@ -228,6 +247,15 @@ function NotifGroup({ title, items, formatTime, getIcon, role }) {
               </p>
               <span className="notif-time">{formatTime(n.createdAt)}</span>
             </div>
+            {n.food && (
+              <div className="notif-food-thumb">
+                {n.food.video?.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+                  <img src={n.food.video} alt="Food" />
+                ) : (
+                  <video src={`${n.food.video}#t=1.0`} muted />
+                )}
+              </div>
+            )}
             {!n.read && <div className="notif-unread-dot" />}
           </motion.div>
         );

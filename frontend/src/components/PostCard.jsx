@@ -101,18 +101,23 @@ export default function PostCard({ food, index = 0 }) {
       >
         {/* Video Container */}
         <div className="post-video-container" onClick={handleDoubleTap}>
-          <video
-            ref={videoRef}
-            src={food?.video}
-            loop
-            muted={muted}
-            playsInline
-            preload="metadata"
-            className="post-video"
-          />
+          {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+            <img src={food?.video} className="post-video" alt="Food post" style={{objectFit: 'cover'}} />
+          ) : (
+            <video
+              ref={videoRef}
+              loop
+              muted={muted}
+              playsInline
+              preload="metadata"
+              className="post-video"
+            >
+              <source src={food?.video ? `${food.video}?tr=orig-true#t=1.0` : ''} type="video/mp4" />
+            </video>
+          )}
 
           {/* Play/Pause overlay */}
-          {!playing && (
+          {!playing && food?.mediaType !== 'image' && !food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
             <div className="post-play-overlay" onClick={togglePlay}>
               <Play size={48} fill="white" />
             </div>
@@ -131,12 +136,14 @@ export default function PostCard({ food, index = 0 }) {
           )}
 
           {/* Mute toggle */}
-          <button
-            className="post-mute-btn"
-            onClick={(e) => { e.stopPropagation(); setMuted(!muted); }}
-          >
-            {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-          </button>
+          {food?.mediaType !== 'image' && !food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
+            <button
+              className="post-mute-btn"
+              onClick={(e) => { e.stopPropagation(); setMuted(!muted); }}
+            >
+              {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+            </button>
+          )}
         </div>
 
         {/* Post Info */}

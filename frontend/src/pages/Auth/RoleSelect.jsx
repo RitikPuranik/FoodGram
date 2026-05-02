@@ -13,56 +13,46 @@ export default function RoleSelect() {
 
       <motion.div
         className="role-container"
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="role-header">
-          <motion.div
-            className="role-logo"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-          >
-            🍕
-          </motion.div>
-          <h1 className="gradient-text">FoodGram</h1>
-          <p>Discover, share & savor food moments</p>
+        <div className="role-header minimalist-header">
+          <h1 className="minimalist-title">FoodGram</h1>
+          <p>Choose your experience</p>
         </div>
 
-        <div className="role-cards">
+        <div className="role-cards minimalist-cards">
           <motion.button
-            className="role-card"
+            className="role-card minimalist-card"
             onClick={() => navigate('/login?role=user')}
-            whileHover={{ scale: 1.03, y: -4 }}
+            whileHover={{ y: -5 }}
             whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="role-card-icon">
-              <UtensilsCrossed size={32} />
+            <div className="minimalist-icon-wrapper">
+              <UtensilsCrossed size={28} strokeWidth={1.5} />
             </div>
-            <h3>I'm a Foodie</h3>
-            <p>Explore delicious food videos, save favorites, and discover new flavors</p>
-            <div className="role-card-arrow">→</div>
+            <h3>Foodie</h3>
+            <p>Explore recipes, save favorites, and share your taste</p>
           </motion.button>
 
           <motion.button
-            className="role-card role-card-partner"
+            className="role-card minimalist-card partner-card"
             onClick={() => navigate('/login?role=partner')}
-            whileHover={{ scale: 1.03, y: -4 }}
+            whileHover={{ y: -5 }}
             whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="role-card-icon partner-icon">
-              <Store size={32} />
+            <div className="minimalist-icon-wrapper partner-icon">
+              <Store size={28} strokeWidth={1.5} />
             </div>
-            <h3>I'm a Food Vendor</h3>
-            <p>Showcase your culinary creations, grow your audience, and get noticed</p>
-            <div className="role-card-arrow">→</div>
+            <h3>Vendor</h3>
+            <p>Showcase creations, grow your audience, and get noticed</p>
           </motion.button>
         </div>
       </motion.div>

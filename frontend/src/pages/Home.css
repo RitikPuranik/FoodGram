@@ -135,18 +135,38 @@
   align-items: start;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .home-page {
-    padding: var(--space-md);
+    padding: var(--space-md) var(--space-md) var(--space-3xl);
+  }
+
+  .home-header {
+    margin-bottom: var(--space-lg);
   }
 
   .home-greeting {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
+  }
+
+  .home-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .home-user-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    font-size: 1.1rem;
   }
 
   .home-grid {
     grid-template-columns: 1fr;
     gap: var(--space-lg);
+  }
+  
+  .category-pill {
+    padding: 10px 20px;
+    font-size: 0.85rem;
   }
 }
 
@@ -178,4 +198,32 @@
   color: var(--text-secondary);
   font-size: 1rem;
   max-width: 300px;
+}
+
+.feed-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin: var(--space-xl) 0;
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.feed-divider::before,
+.feed-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
+.feed-divider span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  padding: 0 var(--space-md);
 }
