@@ -129,74 +129,41 @@ export default function Home() {
         </motion.div>
       ) : (
         <div className="home-feed">
-          {displayedFoods.map((food, i) => {
-            const isLast = i === displayedFoods.length - 1;
-            const isFeatured = i === 0;
-            const showCaughtUp = i > 0 && displayedFoods[i-1].isFollowed === 1 && food.isFollowed === 0;
+          {displayedFoods.length > 0 && (
+            <motion.div
+              key={displayedFoods[0]._id}
+              ref={displayedFoods.length === 1 ? lastFoodElementRef : null}
+              className="home-featured"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="featured-badge">
+                <Flame size={14} />
+                <span>Featured</span>
+              </div>
+              <PostCard food={displayedFoods[0]} index={0} />
+            </motion.div>
+          )}
 
-            const content = (
-              <>
-                {showCaughtUp && (
-                  <div key="caught-up-middle" style={{ gridColumn: '1 / -1' }}>
-                    <EndOfFeed message="You've seen all from your follows!" />
-                    <div className="feed-divider">
-                      <span>More for you</span>
-                    </div>
-                  </div>
-                )}
-                {isFeatured ? (
-                  <motion.div
-                    key={food._id}
-                    ref={isLast ? lastFoodElementRef : null}
-                    className="home-featured"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
+          {displayedFoods.length > 1 && (
+            <div className="home-grid">
+              {displayedFoods.slice(1).map((gridFood, gridIdx) => {
+                const realIdx = gridIdx + 1;
+                const isLastInGrid = realIdx === displayedFoods.length - 1;
+                return (
+                  <div
+                    key={gridFood._id}
+                    ref={isLastInGrid ? lastFoodElementRef : null}
+                    className="home-grid-item"
                   >
-                    <div className="featured-badge">
-                      <Flame size={14} />
-                      <span>Featured</span>
-                    </div>
-                    <PostCard food={food} index={0} />
-                  </motion.div>
-                ) : (
-                  // For the rest, we wrap in the grid
-                  i === 1 ? (
-                    <div key="feed-grid" className="home-grid">
-                      {displayedFoods.slice(1).map((gridFood, gridIdx) => {
-                        const realIdx = gridIdx + 1;
-                        const isLastInGrid = realIdx === displayedFoods.length - 1;
-                        const showInnerCaughtUp = gridIdx > 0 && displayedFoods[realIdx-1].isFollowed === 1 && gridFood.isFollowed === 0;
-                        
-                        return (
-                          <div key={gridFood._id} style={{ display: 'contents' }}>
-                            {showInnerCaughtUp && (
-                              <div style={{ gridColumn: '1 / -1', width: '100%' }}>
-                                <EndOfFeed message="You've seen all from your follows!" />
-                                <div className="feed-divider">
-                                  <span>More for you</span>
-                                </div>
-                              </div>
-                            )}
-                            <div 
-                              ref={isLastInGrid ? lastFoodElementRef : null}
-                              className="home-grid-item"
-                            >
-                              <PostCard food={gridFood} index={realIdx} />
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : null
-                )}
-              </>
-            );
+                    <PostCard food={gridFood} index={realIdx} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-            // Since i=1 handles all grid items, we only return content for i=0 and i=1
-            return i <= 1 ? content : null;
-          })}
-          
           {loadingMore && (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-secondary)' }}>
               <Loader size="small" />

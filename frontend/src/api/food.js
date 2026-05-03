@@ -1,6 +1,10 @@
 import api from './axios';
 
-export const getFoodItems = (page = 1, limit = 10) => api.get(`/food?page=${page}&limit=${limit}`);
+export const getFoodItems = (page = 1, limit = 10, type = '') => {
+  let url = `/food?page=${page}&limit=${limit}`;
+  if (type) url += `&type=${type}`;
+  return api.get(url);
+};
 
 export const createFood = (formData) =>
   api.post('/food', formData, {

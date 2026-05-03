@@ -102,7 +102,7 @@ export default function PostCard({ food, index = 0 }) {
         {/* Video Container */}
         <div className="post-video-container" onClick={handleDoubleTap}>
           {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-            <img src={food?.video} className="post-video" alt="Food post" style={{objectFit: 'cover'}} />
+            <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="post-video" alt="Food post" style={{objectFit: 'cover'}} />
           ) : (
             <video
               ref={videoRef}

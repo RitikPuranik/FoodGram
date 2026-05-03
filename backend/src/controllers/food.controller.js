@@ -86,8 +86,14 @@ async function getFoodItems(req, res) {
         followedVendorIds = follows.map(f => f.following);
     }
 
+    const matchStage = {};
+    if (req.query.type) {
+        matchStage.mediaType = req.query.type;
+    }
+
     // Use aggregation to sort: followed posts first, then by date
     const foodItems = await foodModel.aggregate([
+        { $match: matchStage },
         {
             $addFields: {
                 isFollowed: {
@@ -190,6 +196,10 @@ async function likeFood(req, res) {
     const { foodId } = req.body;
     const user = req.user;
 
+    if (!user) {
+        return res.status(403).json({ message: "Only regular users can like posts." });
+    }
+
     const isAlreadyLiked = await likeModel.findOne({
         user: user._id,
         food: foodId
@@ -249,6 +259,10 @@ async function saveFood(req, res) {
     const { foodId } = req.body;
     const user = req.user;
 
+    if (!user) {
+        return res.status(403).json({ message: "Only regular users can save posts." });
+    }
+
     const isAlreadySaved = await saveModel.findOne({
         user: user._id,
         food: foodId
@@ -306,6 +320,7 @@ async function saveFood(req, res) {
 async function getSaveFood(req, res) {
 
     const user = req.user;
+    if (!user) return res.status(403).json({ message: "Only users can access saved posts" });
 
     const savedFoods = await saveModel.find({ user: user._id }).populate('food');
 
@@ -323,6 +338,10 @@ async function getSaveFood(req, res) {
 async function addComment(req, res) {
     const { foodId, comment } = req.body;
     const user = req.user;
+
+    if (!user) {
+        return res.status(403).json({ message: "Only regular users can add comments." });
+    }
 
     if (!comment || comment.trim() === "") {
         return res.status(400).json({ message: "Comment cannot be empty" });
@@ -434,6 +453,11 @@ async function replyToComment(req, res) {
     try {
         const { parentCommentId } = req.params;
         const { comment } = req.body;
+        
+        if (!req.user) {
+            return res.status(403).json({ message: "Only regular users can reply to comments." });
+        }
+        
         const userId = req.user._id;
 
         const parent = await commentModel.findById(parentCommentId).populate("user", "fullName");

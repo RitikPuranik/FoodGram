@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Play, Heart, X, Hash, TrendingUp,
   ChevronLeft, ChevronRight, MessageCircle,
@@ -133,7 +134,7 @@ export default function Explore() {
   const clearSearch = () => { setSearchQuery(''); setSearchParams({}); };
   const applyTag = (tag) => setSearchQuery(tag);
 
-  const navigate = useCallback((dir) => {
+  const navigatePost = useCallback((dir) => {
     setSelectedIndex(i => {
       const next = i + dir;
       if (next < 0 || next >= foods.length) return i;
@@ -250,8 +251,8 @@ export default function Explore() {
                 transition={{ duration: 0.3, delay: i * 0.03 }}
                 onClick={() => openPost(item.origIdx)}
               >
-                {item.food.video?.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                  <img src={item.food.video} className="explore-tile-video" alt="Food" style={{objectFit: 'cover'}} />
+                {item.food.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                  <img src={item.food.video?.includes('imagekit.io') && !item.food.video.includes('tr=') ? `${item.food.video}?tr=orig-true` : item.food.video} className="explore-tile-video" alt="Food" style={{objectFit: 'cover'}} />
                 ) : (
                   <video
                     muted loop playsInline preload="metadata"
@@ -295,7 +296,7 @@ export default function Explore() {
             foods={foods}
             selectedIndex={selectedIndex}
             onClose={closePost}
-            onNavigate={navigate}
+            onNavigate={navigatePost}
             onTagClick={applyTag}
           />
         )}

@@ -1,4 +1,3 @@
-// create server
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth.routes');
@@ -9,16 +8,27 @@ const profileRoutes = require('./routes/profile.routes');
 const cors = require('cors');
 
 const app = express();
+
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(o => o.trim())
+  : ['http://localhost:5173'];
+
 app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin "${origin}" not allowed`));
+  },
+  credentials: true,
 }));
+
 app.use(cookieParser());
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.send("Hello World");
-})
+app.get('/', (req, res) => {
+  res.send('FoodGram API is running');
+});
 
 app.use('/api/auth', authRoutes);
 app.use('/api/food', foodRoutes);

@@ -32,7 +32,7 @@ export default function Avatar({ src, name, size = 40, className = '', onClick }
     <div className={`avatar-root ${className}`} style={style} onClick={onClick}>
       {src ? (
         <img
-          src={src}
+          src={src.includes('imagekit.io') && !src.includes('tr=') ? `${src}?tr=w-200,h-200,orig-true` : src}
           alt={name || 'avatar'}
           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
           onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}

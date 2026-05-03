@@ -1,11 +1,15 @@
 const notificationModel = require("../models/notification.model");
+require("../models/user.model");
+require("../models/foodpartner.model");
+require("../models/food.model");
+require("../models/comment.model");
 
 async function getUserNotifications(req, res) {
     try {
         const userId = req.user._id;
         const notifications = await notificationModel
             .find({ recipient: userId, recipientModel: "user" })
-            .populate("sender", "name contactName fullName avatar")
+            .populate("sender", "fullName name email avatar")
             .populate("food", "name video")
             .populate("comment", "comment")
             .sort({ createdAt: -1 })
@@ -22,7 +26,7 @@ async function getVendorNotifications(req, res) {
         const vendorId = req.foodPartner._id;
         const notifications = await notificationModel
             .find({ recipient: vendorId, recipientModel: "foodpartner" })
-            .populate("sender", "fullName email avatar")
+            .populate("sender", "fullName name email avatar")
             .populate("food", "name video")
             .populate("comment", "comment")
             .sort({ createdAt: -1 })

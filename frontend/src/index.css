@@ -21,6 +21,9 @@
   --bg-elevated: #222222;
   --bg-glass: rgba(17, 17, 17, 0.7);
   --bg-glass-light: rgba(26, 26, 26, 0.5);
+  /* Alias for components using --bg-card / --bg-color */
+  --bg-card: #111111;
+  --bg-color: #0A0A0A;
 
   /* Text */
   --text-primary: #FFFFFF;
@@ -31,12 +34,15 @@
   /* Accent */
   --accent: #FF9800;
   --accent-red: #E50914;
+  --accent-gold: #FFD700;
   --accent-green: #00C853;
 
   /* Borders */
   --border-subtle: rgba(255, 255, 255, 0.05);
   --border-light: rgba(255, 255, 255, 0.12);
   --border-primary: rgba(255, 87, 34, 0.3);
+  /* Alias */
+  --border-color: rgba(255, 255, 255, 0.12);
 
   /* Shadows */
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -93,6 +99,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--bg-primary);
+  /* Prevent horizontal overflow */
+  overflow-x: hidden;
 }
 
 body {
@@ -102,11 +110,13 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   min-height: 100vh;
+  min-height: 100dvh;
   letter-spacing: -0.01em;
 }
 
 #root {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -143,8 +153,6 @@ img,
 video {
   max-width: 100%;
   display: block;
-  border-radius: inherit;
-  /* Helpful for components */
 }
 
 ul,
@@ -306,105 +314,69 @@ h6 {
   color: var(--primary);
 }
 
+/* ---------- Spinner ---------- */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
 /* ---------- Animations ---------- */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 @keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-
-  100% {
-    transform: translateY(0px);
-  }
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
 }
 
-.animate-fade-in {
-  animation: fadeIn var(--transition-slow) ease-out forwards;
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp var(--transition-spring) forwards;
-}
-
-.animate-scale-in {
-  animation: scaleIn var(--transition-spring) forwards;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
+.animate-fade-in { animation: fadeIn var(--transition-slow) ease-out forwards; }
+.animate-fade-in-up { animation: fadeInUp var(--transition-spring) forwards; }
+.animate-scale-in { animation: scaleIn var(--transition-spring) forwards; }
+.animate-float { animation: float 6s ease-in-out infinite; }
 
 /* ---------- Skeleton Loading ---------- */
 .skeleton {
   background: linear-gradient(90deg,
-      var(--bg-surface) 25%,
-      var(--bg-elevated) 50%,
-      var(--bg-surface) 75%);
+    var(--bg-surface) 25%,
+    var(--bg-elevated) 50%,
+    var(--bg-surface) 75%);
   background-size: 400% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: var(--radius-md);
@@ -414,6 +386,7 @@ h6 {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   background: radial-gradient(circle at top right, rgba(229, 9, 20, 0.05), transparent 40%),
     radial-gradient(circle at bottom left, rgba(255, 87, 34, 0.05), transparent 40%);
@@ -422,10 +395,15 @@ h6 {
 .main-content {
   flex: 1;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
-  padding-bottom: calc(var(--bottom-nav-height) + 40px); /* Extra space for floating nav */
+  /* Bottom padding for the floating mobile nav */
+  padding-bottom: calc(var(--bottom-nav-height) + 40px);
   position: relative;
   z-index: 1;
+  /* Prevent content overflowing beyond viewport width */
+  overflow-x: hidden;
+  min-width: 0;
 }
 
 @media (min-width: 769px) {
@@ -476,6 +454,10 @@ h6 {
   border: 1px solid var(--border-light);
   color: var(--text-primary);
   background: var(--bg-glass);
+  white-space: nowrap;
+  max-width: calc(100vw - 48px);
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 @media (min-width: 769px) {

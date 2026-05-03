@@ -25,7 +25,7 @@ export default function Reels() {
     else setLoadingMore(true);
 
     try {
-      const res = await getFoodItems(pageNum, 10); // Load 10 reels at a time
+      const res = await getFoodItems(pageNum, 10, 'video'); // Only load videos for reels
       const newFoods = res.data.foodItems || [];
       setFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
       setHasMore(res.data.hasMore);
@@ -151,9 +151,9 @@ function ReelItem({ food, isLast, onVisible }) {
 
   return (
     <div className="reel-item" ref={itemRef}>
-      <div className="reel-video-wrap" onClick={handleDoubleTap}>
+      <div className={`reel-video-wrap${!playing ? ' paused' : ''}`} onClick={handleDoubleTap}>
         {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-          <img src={food.video} className="reel-video" alt="Food" style={{objectFit: 'cover'}} />
+          <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="reel-video" alt="Food" style={{objectFit: 'cover'}} />
         ) : (
           <video
             ref={videoRef}

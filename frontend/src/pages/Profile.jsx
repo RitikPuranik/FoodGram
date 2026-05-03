@@ -158,7 +158,7 @@ export default function Profile() {
                 onClick={() => setSelectedFood(food)}
               >
                 {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-                  <img src={food.video} className="profile-grid-video" alt="Food" style={{objectFit: 'cover'}} />
+                  <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="profile-grid-video" alt="Food" style={{objectFit: 'cover'}} />
                 ) : (
                   <video muted preload="metadata" className="profile-grid-video"
                     onMouseEnter={e => e.target.play()}
