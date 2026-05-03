@@ -34,6 +34,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
   // Edit/Delete state
   const [showMenu, setShowMenu] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editTags, setEditTags] = useState('');
@@ -51,6 +52,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
     setShowComments(false);
     setShowMenu(false);
     setIsEditing(false);
+    setIsDescExpanded(false);
     setEditName(food?.name || '');
     setEditDesc(food?.description || '');
     setEditTags(food?.hashtags?.join(', ') || '');
@@ -252,7 +254,19 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
               </div>
             ) : (
               <>
-                {food.description && <p>{food.description}</p>}
+                {food.description && (
+                  <div className={`lb-desc-container ${isDescExpanded ? 'expanded' : 'truncated'}`}>
+                    <p>{food.description}</p>
+                    {!isDescExpanded && food.description.length > 80 && (
+                      <button 
+                        className="lb-more-btn" 
+                        onClick={() => setIsDescExpanded(true)}
+                      >
+                        ...more
+                      </button>
+                    )}
+                  </div>
+                )}
                 {food.hashtags?.length > 0 && (
                   <div className="lb-tags">
                     {food.hashtags.map(tag => (
@@ -315,6 +329,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
 
       <CommentSheet
         foodId={food._id}
+        food={food}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
       />

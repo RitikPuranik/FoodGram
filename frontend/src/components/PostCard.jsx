@@ -231,6 +231,7 @@ export default function PostCard({ food, index = 0 }) {
 
       <CommentSheet
         foodId={food?._id}
+        food={food}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
       />

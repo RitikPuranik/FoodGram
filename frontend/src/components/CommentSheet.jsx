@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { X, Send, Trash2, CornerDownRight } from 'lucide-react';
 import { getComments, addComment, deleteComment, replyToComment } from '../api/food';
@@ -7,8 +8,9 @@ import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
 import './CommentSheet.css';
 
-export default function CommentSheet({ foodId, isOpen, onClose }) {
+export default function CommentSheet({ foodId, food, isOpen, onClose }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const MOBILE_NORMAL_HEIGHT_RATIO = 0.72;
   const MOBILE_CLOSE_HEIGHT_RATIO = 0.42;
   const MOBILE_MIN_HEIGHT_RATIO = 0.32;
@@ -23,6 +25,7 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
   const [isDesktop, setIsDesktop] = useState(false);
   const [mobileSheetHeight, setMobileSheetHeight] = useState(null);
   const [isResizing, setIsResizing] = useState(false);
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const inputRef = useRef(null);
   const replyInputRef = useRef(null);
   const resizeStateRef = useRef(null);
@@ -32,6 +35,7 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
     if (isOpen && foodId) {
       setSheetSize('normal');
       fetchComments();
+      setIsDescExpanded(false);
     }
   }, [isOpen, foodId]);
 
@@ -426,6 +430,55 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
             </div>
 
             <div className="comment-list">
+              {food && (
+                <div className="comment-post-info">
+                  <div className="comment-post-header">
+                    <Avatar 
+                      src={food.foodPartner?.avatar || null} 
+                      name={food.name || 'F'} 
+                      size={36} 
+                    />
+                    <div className="comment-post-meta">
+                      <span className="comment-post-name">{food.name}</span>
+                    </div>
+                  </div>
+                  
+                  {food.description && (
+                    <div className={`comment-post-desc ${isDescExpanded ? 'expanded' : ''}`}>
+                      <p>
+                        {food.description}
+                      </p>
+                      {!isDescExpanded && food.description.length > 80 && (
+                        <button 
+                          className="comment-more-btn" 
+                          onClick={(e) => { e.stopPropagation(); setIsDescExpanded(true); }}
+                        >
+                          ...more
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {food.hashtags?.length > 0 && (
+                    <div className="comment-post-tags">
+                      {food.hashtags.map(tag => (
+                        <button 
+                          key={tag} 
+                          className="comment-tag-pill"
+                          onClick={() => {
+                            onClose();
+                            navigate(`/explore?tag=${encodeURIComponent(tag)}`);
+                          }}
+                        >
+                          #{tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div className="comment-post-divider" />
+                </div>
+              )}
+
               {loading ? (
                 <div className="comment-loading">
                   <div className="skeleton" style={{ width: '100%', height: 60, marginBottom: 12 }} />
