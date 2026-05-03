@@ -65,7 +65,7 @@
 
 @media (max-width: 768px) {
   .explore-page {
-    padding: var(--space-md);
+    padding: var(--space-md) var(--space-md) calc(var(--bottom-nav-height) + var(--space-2xl));
   }
   .explore-grid {
     gap: 3px;
@@ -321,4 +321,3 @@
   color: var(--text-secondary);
   font-size: 0.95rem;
 }
-

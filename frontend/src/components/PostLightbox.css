@@ -96,6 +96,7 @@
   color: var(--text-secondary);
 }
 .lb-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.lb-info-spacer { flex: 1; min-height: 0; }
 
 .lb-actions {
   display: flex; align-items: center; justify-content: space-between;

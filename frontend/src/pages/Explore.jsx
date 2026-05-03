@@ -13,6 +13,7 @@ import Loader from '../components/Loader';
 import Avatar from '../components/Avatar';
 import EndOfFeed from '../components/EndOfFeed';
 import PostLightbox from '../components/PostLightbox';
+import { getStableShuffledItems } from '../utils/feed';
 import './Explore.css';
 
 const TRENDING_TAGS = ['pizza', 'burger', 'sushi', 'biryani', 'tacos', 'pasta', 'dessert', 'bbq', 'vegan', 'streetfood'];
@@ -51,6 +52,7 @@ export default function Explore() {
 
   const debounceRef = useRef(null);
   const observer = useRef();
+  const didInitSearchEffect = useRef(false);
 
   const lastFoodElementRef = useCallback(node => {
     if (loading || loadingMore) return;
@@ -85,7 +87,7 @@ export default function Explore() {
     
     try { 
       const r = await getFoodItems(pageNum, 20); 
-      const newFoods = r.data.foodItems || [];
+      const newFoods = getStableShuffledItems(r.data.foodItems || [], `explore-page-${pageNum}`);
       setFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
       setHasMore(r.data.hasMore);
     } catch {}
@@ -111,6 +113,11 @@ export default function Explore() {
   };
 
   useEffect(() => {
+    if (!didInitSearchEffect.current) {
+      didInitSearchEffect.current = true;
+      return;
+    }
+
     clearTimeout(debounceRef.current);
     const q = searchQuery.replace(/^#+/, '').trim();
     

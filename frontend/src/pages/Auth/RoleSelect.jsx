@@ -9,10 +9,6 @@ export default function RoleSelect() {
 
   return (
     <div className="auth-page">
-      {/* High-end Texture Overlays */}
-      <div className="grain-overlay" />
-      <div className="mesh-gradient" />
-      
       <motion.div
         className="role-selection-wrapper"
         initial={{ opacity: 0 }}

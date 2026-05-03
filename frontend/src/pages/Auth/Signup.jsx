@@ -63,9 +63,6 @@ export default function Signup() {
 
   return (
     <div className="auth-page">
-      <div className="auth-bg-gradient" />
-      <div className="auth-bg-pattern" />
-
       <motion.div
         className="auth-card glass"
         initial={{ opacity: 0, y: 30, scale: 0.96 }}

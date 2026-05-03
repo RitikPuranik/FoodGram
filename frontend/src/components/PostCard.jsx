@@ -16,6 +16,7 @@ export default function PostCard({ food, index = 0 }) {
   const [muted, setMuted] = useState(true);
   const [showComments, setShowComments] = useState(false);
   const [showHeart, setShowHeart] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const videoRef = useRef(null);
   const cardRef = useRef(null);
   const lastTap = useRef(0);
@@ -53,6 +54,11 @@ export default function PostCard({ food, index = 0 }) {
       video.pause();
       setPlaying(false);
     }
+  };
+
+  const toggleExpand = (e) => {
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
   };
 
   const handleDoubleTap = () => {
@@ -146,70 +152,75 @@ export default function PostCard({ food, index = 0 }) {
           )}
         </div>
 
-        {/* Post Info */}
-        <div className="post-info">
+        {/* Post Info - Restructured to look like Reels inside the container */}
+        <div className="post-info overlay-style">
           <div className="post-info-left">
             <div
-              className="post-vendor-link"
-              onClick={handleVendorClick}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: vendorId ? 'pointer' : 'default' }}
+              className={`post-vendor-link ${isExpanded ? 'expanded' : ''}`}
             >
-            <Avatar
-              src={food?.foodPartner?.avatar || null}
-              name={food?.name || 'F'}
-              size={44}
-              className="post-avatar"
-            />
-            <div className="post-meta">
-              <h3 className="post-title">{food?.name || 'Delicious Food'}</h3>
-              {food?.description && (
-                <p className="post-desc">{food.description}</p>
-              )}
-              {/* Hashtag chips */}
-              {food?.hashtags?.length > 0 && (
-                <div className="post-hashtags">
-                  {food.hashtags.slice(0, 4).map((tag) => (
-                    <button
-                      key={tag}
-                      className="post-hashtag-chip"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/explore?tag=${encodeURIComponent(tag)}`);
-                      }}
-                    >
-                      #{tag}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+              <div className="post-meta-header" onClick={handleVendorClick} style={{ cursor: vendorId ? 'pointer' : 'default' }}>
+                <Avatar
+                  src={food?.foodPartner?.avatar || null}
+                  name={food?.name || 'F'}
+                  size={40}
+                  className="post-avatar"
+                />
+                <h3 className="post-title">{food?.name || 'Delicious Food'}</h3>
+              </div>
+              
+              <div className="post-meta-content" onClick={toggleExpand}>
+                {food?.description && (
+                  <p className={`post-desc ${isExpanded ? 'expanded' : 'truncated'}`}>
+                    {food.description}
+                    {!isExpanded && <span className="more-text"> ...more</span>}
+                  </p>
+                )}
+                {/* Hashtag chips */}
+                {food?.hashtags?.length > 0 && (
+                  <div className={`post-hashtags ${isExpanded ? 'expanded' : 'truncated'}`}>
+                    {food.hashtags.map((tag) => (
+                      <button
+                        key={tag}
+                        className="post-hashtag-chip"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/explore?tag=${encodeURIComponent(tag)}`);
+                        }}
+                      >
+                        #{tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="post-actions">
+          <div className="post-actions overlay-actions">
             <button
               className={`post-action-btn ${liked ? 'liked' : ''}`}
               onClick={handleLike}
             >
               <Heart
-                size={20}
+                size={28}
                 fill={liked ? 'var(--accent-red)' : 'none'}
                 color={liked ? 'var(--accent-red)' : 'currentColor'}
               />
-              <span>{likeCount > 0 ? likeCount : ''}</span>
+              <span className="action-count">{likeCount > 0 ? likeCount : ''}</span>
             </button>
             <button
               className="post-action-btn"
               onClick={() => setShowComments(true)}
             >
-              <MessageCircle size={20} />
+              <MessageCircle size={28} />
+              <span className="action-count"></span>
             </button>
             <button
               className={`post-action-btn ${saved ? 'saved' : ''}`}
               onClick={handleSave}
             >
               <Bookmark
-                size={20}
+                size={28}
                 fill={saved ? 'var(--primary)' : 'none'}
                 color={saved ? 'var(--primary)' : 'currentColor'}
               />

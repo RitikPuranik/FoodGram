@@ -72,6 +72,24 @@
   flex-shrink: 0;
 }
 
+.reel-end-screen {
+  min-height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl) var(--space-md) calc(var(--bottom-nav-height) + var(--space-xl));
+  background:
+    radial-gradient(circle at top, rgba(255, 87, 34, 0.14), transparent 36%),
+    linear-gradient(180deg, #020202 0%, #090909 55%, #000 100%);
+}
+
+.reel-end-screen .end-of-feed {
+  max-width: 420px;
+  padding: 0;
+}
+
 .reel-video-wrap {
   position: relative;
   width: 100%;
@@ -89,6 +107,10 @@
     height: calc(100vh - 40px);
     border-radius: var(--radius-xl);
     border: 1px solid var(--border-light);
+  }
+
+  .reel-end-screen {
+    padding: var(--space-2xl);
   }
 }
 

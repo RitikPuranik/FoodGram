@@ -1,9 +1,17 @@
 import api from './axios';
 
-export const getFoodItems = (page = 1, limit = 10, type = '') => {
-  let url = `/food?page=${page}&limit=${limit}`;
-  if (type) url += `&type=${type}`;
-  return api.get(url);
+export const getFoodItems = (page = 1, limit = 10, type = '', options = {}) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (type) params.set('type', type);
+  if (options.followingOnly !== undefined) params.set('followingOnly', String(options.followingOnly));
+  if (options.excludeFollowed !== undefined) params.set('excludeFollowed', String(options.excludeFollowed));
+  if (options.sort) params.set('sort', options.sort);
+
+  return api.get(`/food?${params.toString()}`);
 };
 
 export const createFood = (formData) =>

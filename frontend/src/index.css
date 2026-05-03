@@ -398,12 +398,24 @@ h6 {
   min-height: 100dvh;
   width: 100%;
   /* Bottom padding for the floating mobile nav */
-  padding-bottom: calc(var(--bottom-nav-height) + 40px);
+  padding-bottom: calc(var(--bottom-nav-height) + 10px);
   position: relative;
   z-index: 1;
   /* Prevent content overflowing beyond viewport width */
   overflow-x: hidden;
   min-width: 0;
+}
+
+.auth-main {
+  flex: 1;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden;
 }
 
 @media (min-width: 769px) {

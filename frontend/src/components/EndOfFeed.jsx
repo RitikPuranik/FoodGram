@@ -2,7 +2,10 @@ import { motion } from 'framer-motion';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 import './EndOfFeed.css';
 
-export default function EndOfFeed({ message = "You're all caught up!" }) {
+export default function EndOfFeed({
+  message = "You're all caught up!",
+  subtext = "You've seen all the latest delicious updates.",
+}) {
   return (
     <motion.div 
       className="end-of-feed"
@@ -28,7 +31,7 @@ export default function EndOfFeed({ message = "You're all caught up!" }) {
         </motion.div>
         
         <h3 className="end-of-feed-text">{message}</h3>
-        <p className="end-of-feed-subtext">You've seen all the latest delicious updates.</p>
+        <p className="end-of-feed-subtext">{subtext}</p>
         
         <motion.div 
           className="end-of-feed-sparkle"

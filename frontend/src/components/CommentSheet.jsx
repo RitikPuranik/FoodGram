@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Trash2, CornerDownRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
+import { X, Send, Trash2, CornerDownRight } from 'lucide-react';
 import { getComments, addComment, deleteComment, replyToComment } from '../api/food';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
@@ -8,20 +9,81 @@ import './CommentSheet.css';
 
 export default function CommentSheet({ foodId, isOpen, onClose }) {
   const { user } = useAuth();
+  const MOBILE_NORMAL_HEIGHT_RATIO = 0.72;
+  const MOBILE_CLOSE_HEIGHT_RATIO = 0.42;
+  const MOBILE_MIN_HEIGHT_RATIO = 0.32;
+  const MOBILE_FULL_HEIGHT_RATIO = 0.9;
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyText, setReplyText] = useState('');
   const [loading, setLoading] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState({});
+  const [sheetSize, setSheetSize] = useState('normal');
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [mobileSheetHeight, setMobileSheetHeight] = useState(null);
+  const [isResizing, setIsResizing] = useState(false);
   const inputRef = useRef(null);
   const replyInputRef = useRef(null);
+  const resizeStateRef = useRef(null);
+  const dragControls = useDragControls();
 
   useEffect(() => {
     if (isOpen && foodId) {
+      setSheetSize('normal');
       fetchComments();
     }
   }, [isOpen, foodId]);
+
+  useEffect(() => {
+    if (!isOpen || typeof document === 'undefined') return undefined;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia('(min-width: 769px)');
+    const syncViewportMode = (event) => {
+      setIsDesktop(event.matches ?? mediaQuery.matches);
+    };
+
+    syncViewportMode(mediaQuery);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', syncViewportMode);
+      return () => mediaQuery.removeEventListener('change', syncViewportMode);
+    }
+
+    mediaQuery.addListener(syncViewportMode);
+    return () => mediaQuery.removeListener(syncViewportMode);
+  }, []);
+
+  const getViewportHeight = useCallback(() => (
+    typeof window === 'undefined' ? 0 : window.innerHeight
+  ), []);
+
+  const getNormalMobileHeight = useCallback(() => (
+    Math.round(getViewportHeight() * MOBILE_NORMAL_HEIGHT_RATIO)
+  ), [getViewportHeight]);
+
+  useEffect(() => {
+    if (!isOpen || isDesktop) return;
+
+    const viewportHeight = getViewportHeight();
+    const nextHeight = sheetSize === 'full' ? viewportHeight : getNormalMobileHeight();
+    setMobileSheetHeight(nextHeight);
+  }, [isOpen, isDesktop, sheetSize, getNormalMobileHeight, getViewportHeight]);
 
   const fetchComments = async () => {
     setLoading(true);
@@ -71,7 +133,142 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
     setExpandedReplies(prev => ({ ...prev, [commentId]: !prev[commentId] }));
   };
 
-  const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : '?');
+  const closeSheet = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const handleMobileResizeMove = useCallback((event) => {
+    const resizeState = resizeStateRef.current;
+    if (!resizeState) return;
+
+    const deltaY = event.clientY - resizeState.startY;
+    const nextHeight = Math.min(
+      resizeState.maxHeight,
+      Math.max(resizeState.minHeight, resizeState.startHeight - deltaY)
+    );
+
+    resizeState.lastHeight = nextHeight;
+    setMobileSheetHeight(nextHeight);
+  }, []);
+
+  const handleMobileResizeEnd = useCallback(() => {
+    const resizeState = resizeStateRef.current;
+    if (!resizeState) return;
+
+    window.removeEventListener('pointermove', handleMobileResizeMove);
+    window.removeEventListener('pointerup', handleMobileResizeEnd);
+    window.removeEventListener('pointercancel', handleMobileResizeEnd);
+    setIsResizing(false);
+
+    const currentHeight = resizeState.lastHeight;
+
+    if (currentHeight >= resizeState.maxHeight * MOBILE_FULL_HEIGHT_RATIO) {
+      setSheetSize('full');
+      setMobileSheetHeight(resizeState.maxHeight);
+    } else if (currentHeight <= resizeState.maxHeight * MOBILE_CLOSE_HEIGHT_RATIO) {
+      closeSheet();
+    } else {
+      setSheetSize('normal');
+      setMobileSheetHeight(resizeState.normalHeight);
+    }
+
+    resizeStateRef.current = null;
+  }, [closeSheet, handleMobileResizeMove, MOBILE_CLOSE_HEIGHT_RATIO, MOBILE_FULL_HEIGHT_RATIO]);
+
+  useEffect(() => () => {
+    if (typeof window === 'undefined') return;
+    window.removeEventListener('pointermove', handleMobileResizeMove);
+    window.removeEventListener('pointerup', handleMobileResizeEnd);
+    window.removeEventListener('pointercancel', handleMobileResizeEnd);
+  }, [handleMobileResizeEnd, handleMobileResizeMove]);
+
+  const startHandleDrag = (event) => {
+    if (!isDesktop) {
+      event.preventDefault();
+
+      const viewportHeight = getViewportHeight();
+      const normalHeight = getNormalMobileHeight();
+      const startHeight = mobileSheetHeight ?? (sheetSize === 'full' ? viewportHeight : normalHeight);
+
+      resizeStateRef.current = {
+        startY: event.clientY,
+        startHeight,
+        lastHeight: startHeight,
+        minHeight: Math.round(viewportHeight * MOBILE_MIN_HEIGHT_RATIO),
+        maxHeight: viewportHeight,
+        normalHeight,
+      };
+
+      setIsResizing(true);
+      window.addEventListener('pointermove', handleMobileResizeMove);
+      window.addEventListener('pointerup', handleMobileResizeEnd);
+      window.addEventListener('pointercancel', handleMobileResizeEnd);
+      return;
+    }
+
+    dragControls.start(event);
+  };
+
+  const handleDragEnd = (_, info) => {
+    const distance = isDesktop ? info.offset.x : info.offset.y;
+
+    if (isDesktop) {
+      if (sheetSize === 'full') {
+        if (distance > 260) {
+          closeSheet();
+          return;
+        }
+
+        if (distance > 110) {
+          setSheetSize('normal');
+          return;
+        }
+
+        setSheetSize('full');
+        return;
+      }
+
+      if (distance < -90) {
+        setSheetSize('full');
+        return;
+      }
+
+      if (distance > 120) {
+        closeSheet();
+        return;
+      }
+
+      setSheetSize('normal');
+      return;
+    }
+
+    if (sheetSize === 'full') {
+      if (distance > 220) {
+        closeSheet();
+        return;
+      }
+
+      if (distance > 90) {
+        setSheetSize('normal');
+        return;
+      }
+
+      setSheetSize('full');
+      return;
+    }
+
+    if (distance < -80) {
+      setSheetSize('full');
+      return;
+    }
+
+    if (distance > 170) {
+      closeSheet();
+      return;
+    }
+
+    setSheetSize('normal');
+  };
 
   const timeAgo = (date) => {
     const diff = Date.now() - new Date(date).getTime();
@@ -94,7 +291,7 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
       transition={{ duration: 0.2 }}
     >
       <div className="comment-avatar">
-        <Avatar src={comment.user?.avatar || null} name={comment.user?.fullName} size={36} />
+        <Avatar src={comment.user?.avatar || null} name={comment.user?.fullName} size={32} />
       </div>
       <div className="comment-body">
         <div className="comment-header">
@@ -181,7 +378,7 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
     </motion.div>
   );
 
-  return (
+  const content = (
     <AnimatePresence>
       {isOpen && (
         <>
@@ -193,18 +390,39 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
             onClick={onClose}
           />
           <motion.div
-            className="comment-sheet glass"
+            className={`comment-sheet comment-sheet--${sheetSize} ${isResizing ? 'comment-sheet--resizing' : ''} glass`}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            style={!isDesktop && mobileSheetHeight ? { height: mobileSheetHeight, maxHeight: mobileSheetHeight } : undefined}
+            drag={isDesktop ? 'x' : false}
+            dragControls={dragControls}
+            dragConstraints={isDesktop ? { left: -320, right: 320 } : undefined}
+            dragElastic={0.12}
+            dragListener={false}
+            dragMomentum={false}
+            dragSnapToOrigin
+            onDragEnd={handleDragEnd}
           >
             <div className="comment-sheet-header">
-              <div className="comment-sheet-handle" />
-              <h3>Comments</h3>
-              <button className="comment-close-btn" onClick={onClose}>
-                <X size={20} />
+              <button
+                type="button"
+                className="comment-sheet-dragger"
+                onPointerDown={startHandleDrag}
+                aria-label="Resize comments"
+              >
+                <span className="comment-sheet-handle" />
               </button>
+              <div className="comment-sheet-title">
+                <h3>Comments</h3>
+                <span>{comments.length} {comments.length === 1 ? 'comment' : 'comments'}</span>
+              </div>
+              <div className="comment-sheet-header-actions">
+                <button className="comment-close-btn" onClick={closeSheet} type="button" aria-label="Close comments">
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             <div className="comment-list">
@@ -226,7 +444,7 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
 
             <form className="comment-input-bar" onSubmit={handleAddComment}>
               <div className="comment-input-avatar">
-                <Avatar src={user?.avatar || null} name={user?.fullName} size={34} />
+                <Avatar src={user?.avatar || null} name={user?.fullName} size={30} />
               </div>
               <input
                 ref={inputRef}
@@ -248,4 +466,6 @@ export default function CommentSheet({ foodId, isOpen, onClose }) {
       )}
     </AnimatePresence>
   );
+
+  return createPortal(content, document.body);
 }

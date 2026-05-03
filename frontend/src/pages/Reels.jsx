@@ -6,6 +6,7 @@ import CommentSheet from '../components/CommentSheet';
 import Avatar from '../components/Avatar';
 import Loader from '../components/Loader';
 import EndOfFeed from '../components/EndOfFeed';
+import { getStableShuffledItems } from '../utils/feed';
 import './Reels.css';
 
 export default function Reels() {
@@ -26,7 +27,7 @@ export default function Reels() {
 
     try {
       const res = await getFoodItems(pageNum, 10, 'video'); // Only load videos for reels
-      const newFoods = res.data.foodItems || [];
+      const newFoods = getStableShuffledItems(res.data.foodItems || [], `reels-page-${pageNum}`);
       setFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
       setHasMore(res.data.hasMore);
     } catch (err) {
@@ -62,7 +63,11 @@ export default function Reels() {
             }}
           />
         ))}
-        {!hasMore && foods.length > 0 && <EndOfFeed message="You've seen all the reels!" />}
+        {!hasMore && foods.length > 0 && (
+          <div className="reel-end-screen">
+            <EndOfFeed message="You've seen all the reels!" />
+          </div>
+        )}
       </div>
     </div>
   );

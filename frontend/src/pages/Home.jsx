@@ -1,29 +1,32 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, TrendingUp, Clock, Sparkles } from 'lucide-react';
 import { getFoodItems } from '../api/food';
 import { useAuth } from '../context/AuthContext';
 import PostCard from '../components/PostCard';
 import Loader from '../components/Loader';
 import EndOfFeed from '../components/EndOfFeed';
+import { interleaveFoodItemsByVendor } from '../utils/feed';
 import './Home.css';
 
-const categories = [
-  { id: 'all', label: 'For You', icon: Sparkles },
-  { id: 'trending', label: 'Trending', icon: TrendingUp },
-  { id: 'hot', label: 'Hot Now', icon: Flame },
-  { id: 'recent', label: 'Recent', icon: Clock },
-];
-
 export default function Home() {
-  const { user, role } = useAuth();
-  const [foods, setFoods] = useState([]);
+  const { user } = useAuth();
+  const [followingFoods, setFollowingFoods] = useState([]);
+  const [discoverFoods, setDiscoverFoods] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [feedPhase, setFeedPhase] = useState('following');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const observer = useRef();
+  const arrangedFollowingFoods = useMemo(
+    () => interleaveFoodItemsByVendor(followingFoods, { seed: 'home-following', shuffleGroups: false }),
+    [followingFoods]
+  );
+  const arrangedDiscoverFoods = useMemo(
+    () => interleaveFoodItemsByVendor(discoverFoods, { seed: 'home-discover', shuffleGroups: true }),
+    [discoverFoods]
+  );
+  const foods = [...arrangedFollowingFoods, ...arrangedDiscoverFoods];
 
   const lastFoodElementRef = useCallback(node => {
     if (loading || loadingMore) return;
@@ -37,22 +40,45 @@ export default function Home() {
   }, [loading, loadingMore, hasMore]);
 
   useEffect(() => {
-    fetchFoods(page);
-  }, [page]);
+    fetchFoods(page, feedPhase);
+  }, [page, feedPhase]);
 
-  const fetchFoods = async (pageNum) => {
-    if (pageNum === 1) setLoading(true);
+  const fetchFoods = async (pageNum, phase) => {
+    const shouldUseInitialLoader = pageNum === 1 && followingFoods.length === 0 && discoverFoods.length === 0;
+
+    if (shouldUseInitialLoader) setLoading(true);
     else setLoadingMore(true);
 
     try {
-      const res = await getFoodItems(pageNum, 20);
+      const options = phase === 'following'
+        ? { followingOnly: true, sort: 'latest' }
+        : { excludeFollowed: true, sort: 'latest' };
+      const res = await getFoodItems(pageNum, 8, '', options);
       const newFoods = res.data.foodItems || [];
-      setFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
-      setHasMore(res.data.hasMore);
+
+      if (phase === 'following') {
+        setFollowingFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
+
+        if (res.data.hasMore) {
+          setHasMore(true);
+        } else {
+          setFeedPhase('discover');
+          setPage(1);
+          setHasMore(true);
+          if (shouldUseInitialLoader && newFoods.length === 0) {
+            setLoading(true);
+            setLoadingMore(false);
+            return;
+          }
+        }
+      } else {
+        setDiscoverFoods(prev => pageNum === 1 ? newFoods : [...prev, ...newFoods]);
+        setHasMore(res.data.hasMore);
+      }
     } catch (err) {
       console.error('Fetch foods error:', err);
     }
-    
+
     setLoading(false);
     setLoadingMore(false);
   };
@@ -63,11 +89,6 @@ export default function Home() {
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
   };
-
-  // Simulate categories by shuffling
-  const displayedFoods = activeCategory === 'all'
-    ? foods
-    : [...foods].sort(() => Math.random() - 0.5);
 
   return (
     <div className="home-page">
@@ -82,34 +103,12 @@ export default function Home() {
           <h1 className="home-greeting">
             {getGreeting()}, <span className="gradient-text">{user?.fullName || user?.name || 'Foodie'}</span>
           </h1>
-          <p className="home-subtitle">What are you craving today?</p>
+          <p className="home-subtitle">Fresh posts and new finds for you.</p>
         </div>
         <div className="home-user-avatar">
           {(user?.fullName || user?.name || 'U').charAt(0).toUpperCase()}
         </div>
       </motion.header>
-
-      {/* Category Pills */}
-      <motion.div
-        className="home-categories"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.15 }}
-      >
-        {categories.map((cat) => {
-          const Icon = cat.icon;
-          return (
-            <button
-              key={cat.id}
-              className={`category-pill ${activeCategory === cat.id ? 'active' : ''}`}
-              onClick={() => setActiveCategory(cat.id)}
-            >
-              <Icon size={16} />
-              <span>{cat.label}</span>
-            </button>
-          );
-        })}
-      </motion.div>
 
       {loading ? (
         <Loader text="Loading delicious content..." />
@@ -121,55 +120,61 @@ export default function Home() {
         >
           <div className="home-empty-icon">🍽️</div>
           <h3>No food posts yet</h3>
-          <p>
-            {role === 'partner'
-              ? 'Upload your first food video to get started!'
-              : 'Check back soon for delicious content!'}
-          </p>
+          <p>Check back soon for delicious content!</p>
         </motion.div>
       ) : (
         <div className="home-feed">
-          {displayedFoods.length > 0 && (
-            <motion.div
-              key={displayedFoods[0]._id}
-              ref={displayedFoods.length === 1 ? lastFoodElementRef : null}
-              className="home-featured"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="featured-badge">
-                <Flame size={14} />
-                <span>Featured</span>
-              </div>
-              <PostCard food={displayedFoods[0]} index={0} />
-            </motion.div>
-          )}
+          <div className="home-grid">
+            {arrangedFollowingFoods.map((gridFood, gridIdx) => {
+              const isLastFollowingCard = arrangedDiscoverFoods.length === 0 && gridIdx === arrangedFollowingFoods.length - 1;
 
-          {displayedFoods.length > 1 && (
-            <div className="home-grid">
-              {displayedFoods.slice(1).map((gridFood, gridIdx) => {
-                const realIdx = gridIdx + 1;
-                const isLastInGrid = realIdx === displayedFoods.length - 1;
-                return (
-                  <div
-                    key={gridFood._id}
-                    ref={isLastInGrid ? lastFoodElementRef : null}
-                    className="home-grid-item"
-                  >
-                    <PostCard food={gridFood} index={realIdx} />
-                  </div>
-                );
-              })}
-            </div>
-          )}
+              return (
+                <div
+                  key={`following-${gridFood._id}`}
+                  ref={isLastFollowingCard ? lastFoodElementRef : null}
+                  className="home-grid-item"
+                >
+                  <PostCard food={gridFood} index={gridIdx} />
+                </div>
+              );
+            })}
+
+            {arrangedDiscoverFoods.length > 0 && (
+              <div className="home-discovery-break">
+                <EndOfFeed
+                  message="You've seen the latest posts from people you follow!"
+                  subtext="Now here are random posts you might like."
+                />
+              </div>
+            )}
+
+            {arrangedDiscoverFoods.map((gridFood, gridIdx) => {
+              const combinedIndex = arrangedFollowingFoods.length + gridIdx;
+              const isLastInGrid = combinedIndex === foods.length - 1;
+
+              return (
+                <div
+                  key={`discover-${gridFood._id}`}
+                  ref={isLastInGrid ? lastFoodElementRef : null}
+                  className="home-grid-item"
+                >
+                  <PostCard food={gridFood} index={combinedIndex} />
+                </div>
+              );
+            })}
+
+          </div>
 
           {loadingMore && (
             <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-secondary)' }}>
               <Loader size="small" />
             </div>
           )}
-          {!hasMore && foods.length > 0 && <EndOfFeed />}
+          {!hasMore && foods.length > 0 && feedPhase === 'discover' && (
+            <div className="home-feed-end">
+              <EndOfFeed />
+            </div>
+          )}
         </div>
       )}
     </div>

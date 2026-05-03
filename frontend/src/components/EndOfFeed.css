@@ -83,6 +83,6 @@
 
 @media (max-width: 768px) {
   .end-of-feed {
-    padding: var(--space-2xl) var(--space-md) var(--space-3xl);
+    padding: var(--space-2xl) var(--space-md) calc(var(--bottom-nav-height) + var(--space-3xl));
   }
 }

@@ -45,57 +45,20 @@
   border: 2px solid var(--bg-primary);
 }
 
-/* Categories */
-.home-categories {
-  display: flex;
-  gap: var(--space-md);
-  overflow-x: auto;
-  padding-bottom: var(--space-lg);
-  margin-bottom: var(--space-xl);
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  mask-image: linear-gradient(to right, black 80%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, black 80%, transparent 100%);
-}
-
-.home-categories::-webkit-scrollbar {
-  display: none;
-}
-
-.category-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-light);
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: all var(--transition-spring);
-  cursor: pointer;
-}
-
-.category-pill:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  transform: translateY(-2px);
-}
-
-.category-pill.active {
-  background: var(--primary-gradient);
-  border-color: transparent;
-  color: white;
-  box-shadow: 0 8px 20px rgba(255, 87, 34, 0.3);
-}
-
 /* Feed & Featured */
 .home-feed {
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+}
+
+.home-feed-end {
+  width: 100%;
+}
+
+.home-discovery-break {
+  width: 100%;
+  grid-column: 1 / -1;
 }
 
 .home-featured {
@@ -137,11 +100,13 @@
 
 @media (max-width: 768px) {
   .home-page {
-    padding: var(--space-md) var(--space-md) var(--space-3xl);
+    padding: 0 0 calc(var(--bottom-nav-height) + var(--space-xl)) 0; /* Full bleed on mobile */
+    max-width: 100%;
   }
 
   .home-header {
-    margin-bottom: var(--space-lg);
+    padding: var(--space-md) var(--space-md) 0;
+    margin-bottom: var(--space-md);
   }
 
   .home-greeting {
@@ -161,12 +126,8 @@
 
   .home-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-lg);
-  }
-  
-  .category-pill {
-    padding: 10px 20px;
-    font-size: 0.85rem;
+    gap: var(--space-lg); /* Add gaps back for card separation */
+    padding: 0 var(--space-md);
   }
 }
 
@@ -198,32 +159,4 @@
   color: var(--text-secondary);
   font-size: 1rem;
   max-width: 300px;
-}
-
-.feed-divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-md);
-  margin: var(--space-xl) 0;
-  width: 100%;
-  grid-column: 1 / -1;
-}
-
-.feed-divider::before,
-.feed-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border-light);
-}
-
-.feed-divider span {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-  padding: 0 var(--space-md);
 }

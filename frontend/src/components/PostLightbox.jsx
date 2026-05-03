@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Heart, X, ChevronLeft, ChevronRight, MessageCircle, Bookmark, Send, CornerDownRight, Trash2, ChevronDown, ChevronUp, MoreVertical, Edit2
+  Heart, X, ChevronLeft, ChevronRight, MessageCircle, Bookmark, Trash2, MoreVertical, Edit2
 } from 'lucide-react';
-import { likeFood, saveFood, addComment, getComments, deleteComment, replyToComment, deleteFood, updateFood } from '../api/food';
+import { likeFood, saveFood, deleteFood, updateFood } from '../api/food';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
+import CommentSheet from './CommentSheet';
 import './PostLightbox.css';
 
 function timeAgo(date) {
@@ -21,136 +22,6 @@ function timeAgo(date) {
   return `${Math.floor(days / 7)}w ago`;
 }
 
-function InlineComments({ foodId }) {
-  const { user } = useAuth();
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState('');
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [replyText, setReplyText] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [expandedReplies, setExpandedReplies] = useState({});
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (!foodId) return;
-    setLoading(true);
-    getComments(foodId)
-      .then(r => setComments(r.data.comments || []))
-      .catch(() => setComments([]))
-      .finally(() => setLoading(false));
-  }, [foodId]);
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-    try {
-      await addComment(foodId, newComment.trim());
-      setNewComment('');
-      const r = await getComments(foodId);
-      setComments(r.data.comments || []);
-    } catch {}
-  };
-
-  const handleReply = async (parentId) => {
-    if (!replyText.trim()) return;
-    try {
-      await replyToComment(parentId, replyText.trim());
-      setReplyText(''); setReplyingTo(null);
-      const r = await getComments(foodId);
-      setComments(r.data.comments || []);
-    } catch {}
-  };
-
-  const handleDelete = async (commentId) => {
-    try {
-      await deleteComment(commentId);
-      const r = await getComments(foodId);
-      setComments(r.data.comments || []);
-    } catch {}
-  };
-
-  const renderComment = (comment, depth = 0) => (
-    <div key={comment._id} className={`ic-comment ${depth > 0 ? 'ic-reply' : ''}`}>
-      <div className="ic-avatar">
-        <Avatar src={comment.user?.avatar || null} name={comment.user?.fullName} size={32} />
-      </div>
-      <div className="ic-body">
-        <div className="ic-header">
-          <span className="ic-author">{comment.user?.fullName || 'User'}</span>
-          <span className="ic-time">{timeAgo(comment.createdAt)}</span>
-        </div>
-        <p className="ic-text">{comment.comment}</p>
-        <div className="ic-actions">
-          <button className="ic-action-btn" onClick={() => setReplyingTo(comment._id)}>
-            <CornerDownRight size={12} /> Reply
-          </button>
-          {user && comment.user?._id === user._id && (
-            <button className="ic-action-btn ic-delete" onClick={() => handleDelete(comment._id)}>
-              <Trash2 size={12} /> Delete
-            </button>
-          )}
-        </div>
-        {replyingTo === comment._id && (
-          <div className="ic-reply-input">
-            <input
-              autoFocus
-              type="text"
-              placeholder="Write a reply..."
-              value={replyText}
-              onChange={e => setReplyText(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleReply(comment._id)}
-            />
-            <button onClick={() => handleReply(comment._id)} className="ic-send"><Send size={13} /></button>
-            <button onClick={() => setReplyingTo(null)} className="ic-cancel"><X size={13} /></button>
-          </div>
-        )}
-        {comment.replies?.length > 0 && (
-          <div className="ic-nested">
-            <button className="ic-toggle" onClick={() => setExpandedReplies(p => ({ ...p, [comment._id]: !p[comment._id] }))}>
-              {expandedReplies[comment._id] ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-              {expandedReplies[comment._id] ? 'Hide' : 'View'} {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
-            </button>
-            {expandedReplies[comment._id] && comment.replies.map(r => renderComment(r, depth + 1))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="ic-root">
-      <div className="ic-list">
-        {loading ? (
-          <div className="ic-empty">Loading comments...</div>
-        ) : comments.length === 0 ? (
-          <div className="ic-empty">
-            <MessageCircle size={28} opacity={0.4} />
-            <p>No comments yet.</p>
-            <span>Be the first to comment! 💬</span>
-          </div>
-        ) : (
-          comments.map(c => renderComment(c))
-        )}
-      </div>
-      <form className="ic-input-bar" onSubmit={handleAdd}>
-        <div className="ic-input-avatar">
-          <Avatar src={user?.avatar || null} name={user?.fullName} size={30} />
-        </div>
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="Add a comment..."
-          value={newComment}
-          onChange={e => setNewComment(e.target.value)}
-        />
-        <button type="submit" className={`ic-send-btn ${newComment.trim() ? 'active' : ''}`} disabled={!newComment.trim()}>
-          <Send size={16} />
-        </button>
-      </form>
-    </div>
-  );
-}
-
 export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate, onTagClick, onFoodDeleted, onFoodUpdated }) {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -158,6 +29,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [likeCount, setLikeCount] = useState(food?.likeCount || 0);
+  const [showComments, setShowComments] = useState(false);
 
   // Edit/Delete state
   const [showMenu, setShowMenu] = useState(false);
@@ -176,6 +48,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
     setLiked(false);
     setSaved(false);
     setLikeCount(food?.likeCount || 0);
+    setShowComments(false);
     setShowMenu(false);
     setIsEditing(false);
     setEditName(food?.name || '');
@@ -186,6 +59,11 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
   // Keyboard navigation
   useEffect(() => {
     const handler = (e) => {
+      if (showComments) {
+        if (e.key === 'Escape') setShowComments(false);
+        return;
+      }
+
       // Don't navigate if typing in input
       if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') return;
       if (e.key === 'ArrowRight' && onNavigate) onNavigate(1);
@@ -194,7 +72,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [onNavigate, onClose]);
+  }, [onNavigate, onClose, showComments]);
 
   const handleLike = async () => {
     try {
@@ -392,8 +270,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
             )}
           </div>
 
-          {/* Comments (scrollable) */}
-          <InlineComments foodId={food._id} />
+          <div className="lb-info-spacer" />
 
           {/* Action Bar */}
           <div className="lb-actions">
@@ -405,7 +282,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
               >
                 <Heart size={24} fill={liked ? 'var(--accent-red)' : 'none'} color={liked ? 'var(--accent-red)' : 'currentColor'} />
               </button>
-              <button className="lb-action-btn" aria-label="Comment">
+              <button className="lb-action-btn" onClick={() => setShowComments(true)} aria-label="Comment">
                 <MessageCircle size={24} />
               </button>
             </div>
@@ -435,6 +312,12 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
           <ChevronRight size={28} />
         </button>
       )}
+
+      <CommentSheet
+        foodId={food._id}
+        isOpen={showComments}
+        onClose={() => setShowComments(false)}
+      />
     </motion.div>
   );
 }

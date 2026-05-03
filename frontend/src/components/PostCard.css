@@ -1,4 +1,5 @@
 .post-card {
+  position: relative;
   background: var(--bg-surface);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -16,7 +17,7 @@
 .post-video-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 4 / 7; /* Taller aspect ratio to fit the reels appearance */
   background: #000;
   cursor: pointer;
   overflow: hidden;
@@ -82,108 +83,88 @@
   border-color: transparent;
 }
 
-.post-info {
+.post-info.overlay-style {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  padding: 80px var(--space-md) var(--space-md);
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end; /* actions on right side go to bottom */
   justify-content: space-between;
-  padding: var(--space-lg);
-  gap: var(--space-md);
-  background: linear-gradient(to bottom, var(--bg-surface), var(--bg-elevated));
+  gap: var(--space-sm);
+  pointer-events: none; /* Let clicks pass through background */
 }
 
 .post-info-left {
-  display: flex;
-  align-items: center;
-  gap: var(--space-md);
   flex: 1;
   min-width: 0;
+  pointer-events: auto; /* Re-enable clicks for texts/buttons */
+  position: relative;
+  z-index: 20;
+}
+
+.post-vendor-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.post-meta-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .post-avatar {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  border-radius: 50%;
-  background: var(--primary-gradient);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
-}
-
-.post-meta {
-  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
 }
 
 .post-title {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: -0.3px;
+}
+
+.post-meta-content {
+  cursor: pointer;
+  max-width: 90%;
 }
 
 .post-desc {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-top: 2px;
-}
-
-.post-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.post-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  transition: all var(--transition-spring);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.post-action-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  transform: translateY(-2px);
-}
-
-.post-action-btn.liked {
-  color: var(--accent-red);
-  background: rgba(229, 9, 20, 0.1);
-}
-
-.post-action-btn.liked:hover {
-  background: rgba(229, 9, 20, 0.2);
-}
-
-.post-action-btn.saved {
-  color: var(--primary);
-  background: rgba(255, 87, 34, 0.1);
-}
-
-.post-action-btn.saved:hover {
-  background: rgba(255, 87, 34, 0.2);
-}
-
-.post-action-btn span {
-  font-weight: 700;
   font-size: 0.9rem;
+  color: rgba(255,255,255,0.9);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  line-height: 1.4;
+  margin-top: 4px;
+  transition: all var(--transition-fast);
 }
 
+.post-desc.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Truncate to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-desc.expanded {
+  display: block;
+}
+
+.more-text {
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.8;
+}
+
+/* Hashtags */
 .post-hashtags {
   display: flex;
   flex-wrap: wrap;
@@ -191,16 +172,99 @@
   margin-top: 8px;
 }
 
+.post-hashtags.truncated {
+  display: none; /* Hide tags when not expanded to save space */
+}
+
 .post-hashtag-chip {
-  background: rgba(255, 87, 34, 0.1);
-  color: var(--primary);
-  border: 1px solid rgba(255, 87, 34, 0.2);
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-pill);
   padding: 4px 10px;
   font-size: 0.75rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+}
+
+/* Actions matching Reels layout on bottom right */
+.post-actions.overlay-actions {
+  display: flex;
+  flex-direction: column; /* Stacked right */
+  align-items: center;
+  gap: 16px;
+  pointer-events: auto;
+  z-index: 20;
+  margin-bottom: 18px;
+}
+
+.post-action-btn {
+  display: flex;
+  flex-direction: column; /* Icon above text */
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  color: #fff;
+  font-size: 0.8rem;
+  transition: all var(--transition-spring);
+  padding: 0;
+  border-radius: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.post-action-btn:hover {
+  background: transparent;
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.post-action-btn.liked {
+  color: var(--accent-red);
+}
+
+.post-action-btn.liked:hover {
+  background: transparent;
+}
+
+.post-action-btn.saved {
+  color: var(--primary);
+}
+
+.post-action-btn.saved:hover {
+  background: transparent;
+}
+
+.action-count {
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* ---------- Mobile Native Overrides ---------- */
+@media (max-width: 768px) {
+  .post-card {
+    border-radius: var(--radius-lg);
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    margin-bottom: var(--space-md);
+  }
+
+  .post-card:hover {
+    transform: none; /* Disable hover lift on mobile */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .post-video-container {
+    aspect-ratio: 1 / 1;
+    height: auto; /* Not 75vh anymore, just a square or specific aspect ratio for feed */
+  }
+
+  .post-info.overlay-style {
+    padding: 60px var(--space-sm) var(--space-md); /* Slightly tighter padding for mobile screens */
+  }
+
+  .post-actions.overlay-actions {
+    margin-bottom: 24px;
+  }
 }
 
 .post-hashtag-chip:hover {

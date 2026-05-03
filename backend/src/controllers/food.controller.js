@@ -79,6 +79,9 @@ async function getFoodItems(req, res) {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
+    const followingOnly = req.query.followingOnly === 'true';
+    const excludeFollowed = req.query.excludeFollowed === 'true';
+    const sortMode = req.query.sort === 'latest' ? 'latest' : 'default';
 
     let followedVendorIds = [];
     if (req.user) {
@@ -90,11 +93,29 @@ async function getFoodItems(req, res) {
     if (req.query.type) {
         matchStage.mediaType = req.query.type;
     }
+    if (followingOnly) {
+        matchStage.foodPartner = { $in: followedVendorIds };
+    } else if (excludeFollowed) {
+        matchStage.foodPartner = { $nin: followedVendorIds };
+    }
 
-    // Use aggregation to sort: followed posts first, then by date
-    const foodItems = await foodModel.aggregate([
-        { $match: matchStage },
-        {
+    const totalCount = await foodModel.countDocuments(matchStage);
+    const sortStage = followingOnly || sortMode === 'latest'
+        ? { createdAt: -1 }
+        : { isFollowed: -1, createdAt: -1 };
+
+    const aggregation = [
+        { $match: matchStage }
+    ];
+
+    if (followingOnly) {
+        aggregation.push({
+            $addFields: {
+                isFollowed: 1
+            }
+        });
+    } else {
+        aggregation.push({
             $addFields: {
                 isFollowed: {
                     $cond: {
@@ -104,8 +125,11 @@ async function getFoodItems(req, res) {
                     }
                 }
             }
-        },
-        { $sort: { isFollowed: -1, createdAt: -1 } },
+        });
+    }
+
+    aggregation.push(
+        { $sort: sortStage },
         { $skip: skip },
         { $limit: limit },
         {
@@ -135,13 +159,17 @@ async function getFoodItems(req, res) {
                 }
             }
         }
-    ]);
+    );
+
+    const foodItems = await foodModel.aggregate(aggregation);
 
     res.status(200).json({
         message: "Food items fetched successfully",
         foodItems,
         page,
-        hasMore: foodItems.length === limit
+        hasMore: skip + foodItems.length < totalCount,
+        totalCount,
+        followingCount: followedVendorIds.length
     })
 }
 

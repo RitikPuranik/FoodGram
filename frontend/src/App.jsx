@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import RoleSelect from './pages/Auth/RoleSelect';
@@ -11,6 +11,7 @@ import Notifications from './pages/Notifications';
 import Profile from './pages/Profile';
 import Upload from './pages/Upload';
 import VendorProfile from './pages/VendorProfile';
+import VideoBackground from './pages/Auth/VideoBackground';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -19,10 +20,14 @@ function ProtectedRoute({ children }) {
 }
 
 function App() {
+  const location = useLocation();
+  const isAuthPage = ['/', '/login', '/signup'].includes(location.pathname);
+
   return (
     <div className="app-layout">
-      <Navbar />
-      <main className="main-content">
+      {isAuthPage && <VideoBackground />}
+      {!isAuthPage && <Navbar />}
+      <main className={isAuthPage ? "auth-main" : "main-content"}>
         <Routes>
           <Route path="/" element={<RoleSelect />} />
           <Route path="/login" element={<Login />} />
