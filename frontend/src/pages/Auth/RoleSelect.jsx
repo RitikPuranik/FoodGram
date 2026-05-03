@@ -18,7 +18,7 @@ export default function RoleSelect() {
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="role-header minimalist-header">
-          <h1 className="minimalist-title">FoodGram</h1>
+          <h1 className="minimalist-title brand-name">{import.meta.env.VITE_APP_NAME || 'FoodGram'}</h1>
           <p>Choose your experience</p>
         </div>
 

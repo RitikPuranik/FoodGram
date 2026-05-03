@@ -86,7 +86,7 @@ export default function Upload() {
         animate={{ opacity: 1, y: 0 }}
       >
         <h1>Share a Recipe</h1>
-        <p>Upload your latest food creation to FoodGram</p>
+        <p>Upload your latest food creation to <span className="brand-name">{import.meta.env.VITE_APP_NAME || 'FoodGram'}</span></p>
       </motion.div>
 
       <motion.div

@@ -79,7 +79,7 @@ export default function Signup() {
         <div className="auth-card-header">
           <div className="auth-logo-mini">🍕</div>
           <h2>Create account</h2>
-          <p>Join FoodGram as a {role === 'partner' ? 'food vendor' : 'foodie'}</p>
+          <p>Join <span className="brand-name">{import.meta.env.VITE_APP_NAME || 'FoodGram'}</span> as a {role === 'partner' ? 'food vendor' : 'foodie'}</p>
         </div>
 
         {error && (

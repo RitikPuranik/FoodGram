@@ -28,7 +28,7 @@ export default function Navbar() {
             <div className="logo-icon">
               <span>🍕</span>
             </div>
-            <span className="logo-text gradient-text">FoodGram</span>
+            <span className="logo-text gradient-text brand-name">{import.meta.env.VITE_APP_NAME || 'FoodGram'}</span>
           </NavLink>
 
           <nav className="sidebar-nav">
