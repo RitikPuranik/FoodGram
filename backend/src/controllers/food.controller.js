@@ -140,7 +140,20 @@ async function getFoodItems(req, res) {
                 as: 'foodPartner'
             }
         },
+        {
+            $lookup: {
+                from: 'comments',
+                localField: '_id',
+                foreignField: 'food',
+                as: 'foodComments'
+            }
+        },
         { $unwind: { path: '$foodPartner', preserveNullAndEmptyArrays: true } },
+        {
+            $addFields: {
+                computedCommentCount: { $size: { $ifNull: ["$foodComments", []] } }
+            }
+        },
         {
             $project: {
                 name: 1,
@@ -149,6 +162,7 @@ async function getFoodItems(req, res) {
                 description: 1,
                 likeCount: 1,
                 savesCount: 1,
+                commentCount: "$computedCommentCount",
                 views: 1,
                 hashtags: 1,
                 createdAt: 1,
@@ -193,9 +207,9 @@ async function searchByHashtag(req, res) {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-            
-            return res.status(200).json({ 
-                message: 'All food items', 
+
+            return res.status(200).json({
+                message: 'All food items',
                 foodItems,
                 page,
                 hasMore: foodItems.length === limit
@@ -421,7 +435,7 @@ async function getComments(req, res) {
 
         const commentTree = topLevelComments.map(top => {
             const replies = [];
-            
+
             function findDescendants(parentId) {
                 const children = allComments.filter(c => String(c.parentComment) === String(parentId));
                 for (let child of children) {
@@ -434,12 +448,12 @@ async function getComments(req, res) {
                     findDescendants(child._id);
                 }
             }
-            
+
             findDescendants(top._id);
-            
+
             // Sort replies by createdAt
             replies.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-            
+
             return {
                 ...top,
                 replies
@@ -482,11 +496,11 @@ async function replyToComment(req, res) {
     try {
         const { parentCommentId } = req.params;
         const { comment } = req.body;
-        
+
         if (!req.user) {
             return res.status(403).json({ message: "Only regular users can reply to comments." });
         }
-        
+
         const userId = req.user._id;
 
         const parent = await commentModel.findById(parentCommentId).populate("user", "fullName");
@@ -496,7 +510,7 @@ async function replyToComment(req, res) {
 
         const reply = await commentModel.create({
             user: userId,
-            food: parent.food,  
+            food: parent.food,
             comment,
             parentComment: parentCommentId
         });

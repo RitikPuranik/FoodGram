@@ -52,9 +52,9 @@ export default function Reels() {
     <div className="reels-page" ref={containerRef}>
       <div className="reels-scroll-container">
         {foods.map((food, index) => (
-          <ReelItem 
-            key={food._id} 
-            food={food} 
+          <ReelItem
+            key={food._id}
+            food={food}
             isLast={index === foods.length - 1}
             onVisible={() => {
               if (hasMore && !loadingMore) {
@@ -97,10 +97,10 @@ function ReelItem({ food, isLast, onVisible }) {
         if (entry.isIntersecting) {
           if (entry.intersectionRatio > 0.7) {
             video.currentTime = 0;
-            video.play().catch(() => {});
+            video.play().catch(() => { });
             setPlaying(true);
           }
-          
+
           // Trigger load more if this is the last item
           if (isLast && onVisible) {
             onVisible();
@@ -158,7 +158,7 @@ function ReelItem({ food, isLast, onVisible }) {
     <div className="reel-item" ref={itemRef}>
       <div className={`reel-video-wrap${!playing ? ' paused' : ''}`} onClick={handleDoubleTap}>
         {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-          <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="reel-video" alt="Food" style={{objectFit: 'cover'}} />
+          <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="reel-video" alt="Food" style={{ objectFit: 'cover' }} />
         ) : (
           <video
             ref={videoRef}
@@ -229,7 +229,7 @@ function ReelItem({ food, isLast, onVisible }) {
         </button>
         <button className="reel-action-btn" onClick={() => setShowComments(true)}>
           <MessageCircle size={26} />
-          <span>Chat</span>
+          <span>{food?.commentCount > 0 ? food.commentCount : ''}</span>
         </button>
         <button
           className={`reel-action-btn ${saved ? 'saved' : ''}`}
@@ -240,7 +240,7 @@ function ReelItem({ food, isLast, onVisible }) {
             fill={saved ? 'var(--primary)' : 'none'}
             color={saved ? 'var(--primary)' : 'white'}
           />
-          <span>Save</span>
+          <span>{food?.savesCount > 0 ? food.savesCount : ''}</span>
         </button>
         <button
           className="reel-action-btn"

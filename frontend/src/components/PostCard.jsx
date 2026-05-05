@@ -31,7 +31,7 @@ export default function PostCard({ food, index = 0 }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(() => {});
+          video.play().catch(() => { });
           setPlaying(true);
         } else {
           video.pause();
@@ -108,7 +108,7 @@ export default function PostCard({ food, index = 0 }) {
         {/* Video Container */}
         <div className="post-video-container" onClick={handleDoubleTap}>
           {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-            <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="post-video" alt="Food post" style={{objectFit: 'cover'}} />
+            <img src={food?.video?.includes('imagekit.io') && !food?.video?.includes('tr=') ? `${food.video}?tr=orig-true` : food?.video} className="post-video" alt="Food post" style={{ objectFit: 'cover' }} />
           ) : (
             <video
               ref={videoRef}
@@ -167,7 +167,7 @@ export default function PostCard({ food, index = 0 }) {
                 />
                 <h3 className="post-title">{food?.name || 'Delicious Food'}</h3>
               </div>
-              
+
               <div className="post-meta-content" onClick={toggleExpand}>
                 {food?.description && (
                   <p className={`post-desc ${isExpanded ? 'expanded' : 'truncated'}`}>
@@ -213,7 +213,7 @@ export default function PostCard({ food, index = 0 }) {
               onClick={() => setShowComments(true)}
             >
               <MessageCircle size={28} />
-              <span className="action-count"></span>
+              <span className="action-count">{food?.commentCount > 0 ? food.commentCount : ''}</span>
             </button>
             <button
               className={`post-action-btn ${saved ? 'saved' : ''}`}
@@ -224,6 +224,7 @@ export default function PostCard({ food, index = 0 }) {
                 fill={saved ? 'var(--primary)' : 'none'}
                 color={saved ? 'var(--primary)' : 'currentColor'}
               />
+              <span className="action-count">{food?.savesCount > 0 ? food.savesCount : ''}</span>
             </button>
           </div>
         </div>

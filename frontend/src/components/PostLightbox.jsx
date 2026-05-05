@@ -59,7 +59,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
 
     // Increment views
     if (food?._id) {
-      incrementViews(food._id).catch(() => {});
+      incrementViews(food._id).catch(() => { });
     }
   }, [food?._id]);
 
@@ -86,11 +86,11 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
       setLiked(p => !p);
       setLikeCount(p => liked ? p - 1 : p + 1);
       await likeFood(food._id);
-    } catch {}
+    } catch { }
   };
 
   const handleSave = async () => {
-    try { setSaved(p => !p); await saveFood(food._id); } catch {}
+    try { setSaved(p => !p); await saveFood(food._id); } catch { }
   };
 
   const handleDelete = async () => {
@@ -117,9 +117,9 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
       setShowMenu(false);
       if (onFoodUpdated) onFoodUpdated(res.data.food);
       else {
-          // If no callback, we can just reload the page or update locally if possible,
-          // but the parent handles it best.
-          window.location.reload(); 
+        // If no callback, we can just reload the page or update locally if possible,
+        // but the parent handles it best.
+        window.location.reload();
       }
     } catch (e) {
       console.error(e);
@@ -160,7 +160,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
         {/* LEFT — Video */}
         <div className="lb-video-side">
           {food?.mediaType === 'image' || food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-            <img src={food.video} className="lb-video" alt="Food" style={{objectFit: 'cover'}} />
+            <img src={food.video} className="lb-video" alt="Food" style={{ objectFit: 'cover' }} />
           ) : (
             <video
               key={food.video}
@@ -203,8 +203,8 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
                 )}
               </div>
             </div>
-            
-            <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               {isOwner && (
                 <div style={{ position: 'relative' }}>
                   <button className="lb-close" onClick={() => setShowMenu(!showMenu)} aria-label="Menu">
@@ -232,25 +232,25 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
           <div className="lb-description">
             {isEditing ? (
               <div className="lb-edit-form">
-                <input 
-                  type="text" 
-                  value={editName} 
-                  onChange={e => setEditName(e.target.value)} 
-                  placeholder="Post Title" 
-                  className="lb-edit-input" 
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  placeholder="Post Title"
+                  className="lb-edit-input"
                 />
-                <textarea 
-                  value={editDesc} 
-                  onChange={e => setEditDesc(e.target.value)} 
-                  placeholder="Description..." 
+                <textarea
+                  value={editDesc}
+                  onChange={e => setEditDesc(e.target.value)}
+                  placeholder="Description..."
                   className="lb-edit-textarea"
                 />
-                <input 
-                  type="text" 
-                  value={editTags} 
-                  onChange={e => setEditTags(e.target.value)} 
-                  placeholder="Hashtags (comma separated)" 
-                  className="lb-edit-input" 
+                <input
+                  type="text"
+                  value={editTags}
+                  onChange={e => setEditTags(e.target.value)}
+                  placeholder="Hashtags (comma separated)"
+                  className="lb-edit-input"
                 />
                 <div className="lb-edit-actions">
                   <button onClick={() => setIsEditing(false)} className="lb-edit-cancel">Cancel</button>
@@ -263,8 +263,8 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
                   <div className={`lb-desc-container ${isDescExpanded ? 'expanded' : 'truncated'}`}>
                     <p>{food.description}</p>
                     {!isDescExpanded && food.description.length > 80 && (
-                      <button 
-                        className="lb-more-btn" 
+                      <button
+                        className="lb-more-btn"
                         onClick={() => setIsDescExpanded(true)}
                       >
                         ...more
@@ -278,7 +278,7 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
                       <button
                         key={tag}
                         className="explore-tag-pill small"
-                        onClick={() => { if(onTagClick) { onClose(); onTagClick(tag); } }}
+                        onClick={() => { if (onTagClick) { onClose(); onTagClick(tag); } }}
                       >
                         #{tag}
                       </button>
