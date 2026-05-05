@@ -1,5 +1,6 @@
 const foodPartnerModel = require('../models/foodpartner.model');
 const foodModel = require('../models/food.model');
+const followModel = require('../models/follow.model');
 
 async function getFoodPartnerById(req, res) {
   try {
@@ -12,12 +13,14 @@ async function getFoodPartnerById(req, res) {
     }
 
     const foodItemsByFoodPartner = await foodModel.find({ foodPartner: foodPartnerId });
+    const followersCount = await followModel.countDocuments({ following: foodPartnerId });
 
     res.status(200).json({
       message: 'Food partner retrieved successfully',
       foodPartner: {
         ...foodPartner.toObject(),
-        foodItems: foodItemsByFoodPartner
+        foodItems: foodItemsByFoodPartner,
+        followersCount
       }
     });
   } catch (err) {

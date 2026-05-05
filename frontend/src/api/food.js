@@ -42,3 +42,5 @@ export const searchFoodByHashtag = (query, page = 1, limit = 10) =>
 export const deleteFood = (foodId) => api.delete(`/food/${foodId}`);
 
 export const updateFood = (foodId, data) => api.put(`/food/${foodId}`, data);
+
+export const incrementViews = (foodId) => api.post(`/food/${foodId}/view`);

@@ -8,8 +8,13 @@ const followSchema = new mongoose.Schema({
     },
     following: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "foodpartner",
-        required: true
+        required: true,
+        refPath: 'onModel'
+    },
+    onModel: {
+        type: String,
+        required: true,
+        enum: ['user', 'foodpartner']
     }
 }, {
     timestamps: true

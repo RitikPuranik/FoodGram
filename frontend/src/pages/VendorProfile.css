@@ -130,13 +130,14 @@
 .vendor-grid-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
+  background: rgba(0,0,0,0);
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 10px 12px;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all 0.2s;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 40%);
 }
 .vendor-grid-item:hover .vendor-grid-overlay {
   opacity: 1;
@@ -144,10 +145,13 @@
 .vendor-grid-stat {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   color: white;
-  font-size: 0.78rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.vendor-grid-stat svg {
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.5));
 }
 
 /* Empty */

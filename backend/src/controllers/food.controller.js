@@ -149,6 +149,7 @@ async function getFoodItems(req, res) {
                 description: 1,
                 likeCount: 1,
                 savesCount: 1,
+                views: 1,
                 hashtags: 1,
                 createdAt: 1,
                 isFollowed: 1,
@@ -612,6 +613,16 @@ async function updateFood(req, res) {
     res.status(200).json({ message: "Post updated successfully", food });
 }
 
+async function incrementViews(req, res) {
+    try {
+        const { foodId } = req.params;
+        await foodModel.findByIdAndUpdate(foodId, { $inc: { views: 1 } });
+        res.status(200).json({ message: "View incremented" });
+    } catch (e) {
+        res.status(500).json({ message: e.message });
+    }
+}
+
 module.exports = {
     createFood,
     getFoodItems,
@@ -625,5 +636,6 @@ module.exports = {
     deleteCommentRecursive,
     replyToComment,
     deleteFood,
-    updateFood
+    updateFood,
+    incrementViews
 }

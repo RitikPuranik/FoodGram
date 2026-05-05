@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   Heart, X, ChevronLeft, ChevronRight, MessageCircle, Bookmark, Trash2, MoreVertical, Edit2
 } from 'lucide-react';
-import { likeFood, saveFood, deleteFood, updateFood } from '../api/food';
+import { likeFood, saveFood, deleteFood, updateFood, incrementViews } from '../api/food';
 import { useAuth } from '../context/AuthContext';
 import Avatar from './Avatar';
 import CommentSheet from './CommentSheet';
@@ -56,6 +56,11 @@ export default function PostLightbox({ foods, selectedIndex, onClose, onNavigate
     setEditName(food?.name || '');
     setEditDesc(food?.description || '');
     setEditTags(food?.hashtags?.join(', ') || '');
+
+    // Increment views
+    if (food?._id) {
+      incrementViews(food._id).catch(() => {});
+    }
   }, [food?._id]);
 
   // Keyboard navigation

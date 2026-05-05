@@ -139,6 +139,10 @@ async function seed() {
                 console.log(`  Added ${numReplies} replies to comments.`);
             }
 
+            // VIEWS (between 50 and 500 views per post)
+            food.views = randomInt(50, 500);
+            console.log(`  Added ${food.views} views.`);
+
             // Save the updated food counts
             await food.save();
         }

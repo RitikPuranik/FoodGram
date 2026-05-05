@@ -90,8 +90,14 @@ export default function VendorProfile() {
             <span className="vendor-stat-label">Posts</span>
           </div>
           <div className="vendor-stat">
-            <span className="vendor-stat-num">{totalLikes}</span>
-            <span className="vendor-stat-label">Likes</span>
+            <span className="vendor-stat-num">{vendor?.followersCount || 0}</span>
+            <span className="vendor-stat-label">Followers</span>
+          </div>
+          <div className="vendor-stat">
+            <span className="vendor-stat-num">
+              {foodItems.reduce((acc, f) => acc + (f.views || 0), 0).toLocaleString()}
+            </span>
+            <span className="vendor-stat-label">Views</span>
           </div>
         </div>
       </motion.div>
@@ -135,9 +141,9 @@ export default function VendorProfile() {
                 <div className="vendor-grid-stat">
                   <Heart size={13} fill="white" /> {food.likeCount || 0}
                 </div>
-                {food.mediaType !== 'image' && !food.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
-                  <Play size={15} fill="white" />
-                )}
+                <div className="vendor-grid-stat">
+                  <Play size={14} fill="white" /> {food.views || 0}
+                </div>
               </div>
             </motion.div>
           ))}

@@ -4,6 +4,7 @@ import { LogOut, Grid3X3, Bookmark, Settings, Play, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { getSavedFoods, getFoodItems } from '../api/food';
 import { getFoodPartnerById } from '../api/foodPartner';
+import { getMyProfile } from '../api/profile';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import EditProfileModal from '../components/EditProfileModal';
@@ -19,24 +20,31 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [selectedFood, setSelectedFood] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [stats, setStats] = useState({ followers: 0, following: 0, totalViews: 0 });
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
-    if (role === 'partner') {
-      try {
+    try {
+      // Fetch stats from /profile/me
+      const profileRes = await getMyProfile();
+      setStats({
+        followers: profileRes.data.followersCount || 0,
+        following: profileRes.data.followingCount || 0,
+        totalViews: profileRes.data.totalViews || 0
+      });
+
+      if (role === 'partner') {
         const partnerRes = await getFoodPartnerById(user._id);
         setAllFoods(partnerRes.data.foodPartner.foodItems || []);
-      } catch (e) {}
-    } else {
-      try {
+      } else {
         const savedRes = await getSavedFoods();
         setSavedFoods(savedRes.data.savedFoods?.map(s => s.food) || []);
-      } catch (e) {
-        setSavedFoods([]);
       }
+    } catch (e) {
+      console.error('Error fetching profile data:', e);
     }
     setLoading(false);
   };
@@ -82,16 +90,12 @@ export default function Profile() {
                 </div>
               )}
               <div className="profile-stat">
-                <span className="stat-number">
-                  {role === 'partner'
-                    ? allFoods.reduce((a, f) => a + (f.likeCount || 0), 0)
-                    : savedFoods.reduce((a, f) => a + (f?.likeCount || 0), 0)}
-                </span>
-                <span className="stat-label">Likes</span>
+                <span className="stat-number">{stats.followers.toLocaleString()}</span>
+                <span className="stat-label">Followers</span>
               </div>
               <div className="profile-stat">
-                <span className="stat-number">{savedFoods.length}</span>
-                <span className="stat-label">Saved</span>
+                <span className="stat-number">{stats.following.toLocaleString()}</span>
+                <span className="stat-label">Following</span>
               </div>
             </div>
           </div>
@@ -169,9 +173,7 @@ export default function Profile() {
                 )}
                 <div className="profile-grid-overlay">
                   <div className="profile-grid-stat"><Heart size={14} fill="white" /> {food?.likeCount || 0}</div>
-                  {food?.mediaType !== 'image' && !food?.video?.match(/\.(jpeg|jpg|gif|png|webp)$/i) && (
-                    <Play size={16} fill="white" />
-                  )}
+                  <div className="profile-grid-stat"><Play size={14} fill="white" /> {food?.views || 0}</div>
                 </div>
               </motion.div>
             ))}

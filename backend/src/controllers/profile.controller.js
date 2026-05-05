@@ -1,5 +1,7 @@
 const userModel = require('../models/user.model');
 const foodPartnerModel = require('../models/foodpartner.model');
+const followModel = require('../models/follow.model');
+const foodModel = require('../models/food.model');
 const storageService = require('../services/storage.service');
 const { v4: uuid } = require('uuid');
 
@@ -72,7 +74,21 @@ async function getMyProfile(req, res) {
         const profile = await model.findById(id).select('-password');
         if (!profile) return res.status(404).json({ message: 'Profile not found' });
 
-        res.status(200).json({ profile });
+        const followersCount = await followModel.countDocuments({ following: id });
+        const followingCount = await followModel.countDocuments({ follower: id });
+        
+        let totalViews = 0;
+        if (isPartner) {
+            const foods = await foodModel.find({ foodPartner: id });
+            totalViews = foods.reduce((acc, f) => acc + (f.views || 0), 0);
+        }
+
+        res.status(200).json({ 
+            profile,
+            followersCount,
+            followingCount,
+            totalViews
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -78,4 +78,8 @@ router.delete('/:foodId',
     foodController.deleteFood
 );
 
+router.post('/:foodId/view',
+    foodController.incrementViews
+);
+
 module.exports = router
