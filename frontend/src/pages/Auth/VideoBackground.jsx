@@ -3,10 +3,9 @@ import './Auth.css';
 
 // Importing local video assets
 import video1 from '../../assets/video/video1.mp4';
-import video2 from '../../assets/video/video2.mp4';
 import video3 from '../../assets/video/video3.mp4';
 
-const videos = [video1, video2, video3];
+const videos = [video1, video3];
 
 export default function VideoBackground() {
   const [currentIndex, setCurrentIndex] = useState(0);
